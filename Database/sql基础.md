@@ -104,11 +104,58 @@ DBMS (Database Management System):用来管理数据库的计算机系统称为�
       ALTER TABLE <表名> ADD COLUMN <列名> [列约束];
       ALTER TABLE <表名> DROP COLUMN <列名>;
       ```
-    * 插入数据
+    * 插入数据
       ```sql
       INSERT INTO <表名> VALUES (值列表);
       ```
     * 变更表名
-    ```sql
+     ```sql
       ALTER TABLE <原表名> RENAME TO <新表名>;
       ```
+
+## 查询基础
+
+### 1. SELECT语句基础
+
+  ```sql
+  SELECT <列名1>,... FROM <表名>;
+  ```
+1. 列的查询：
+    * clause(子句):上面的语句包含SELECT和FROM两个子句。
+    * 查询结果中的列的顺序和SELECT子句中的列顺序相同。
+    * SELECT子句中使用*号表示所有列；此时结果中的列的顺序和创建表定义时的顺序相同。
+
+2. 别名
+    ```sql
+    SELECT <列名1> AS <别名1>[,<列名2> AS <别名2>...] FROM <表名>;
+    ```
+    * tips:别名中间有空格时，要使用双引号.
+
+3. DISTINCT关键字：去除重复行
+    * 使用DISTINCT时,NULL也被视为一类值。
+    * DISTINCT只能用在第一个列名前。
+
+4. WHERE子句(根据条件筛选)
+    ```sql
+    SELECT * FROM <表名> [WHERE <条件表达式>];
+    ```
+    * SQL语句中的书写顺序(子句顺序)是固定的
+
+5. 注释
+    * 单行注释： --
+    * 多行注释：/* */
+    * 一条SQL语句中也可以插入注释。
+
+### 2. 运算符
+
+1. 算术运行符和比较运行符
+    * 比较运算符：=,<>,>,<,>=,<=,IS NULL,IS NOT NULL.比较运算会的结果为逻辑值。
+    * 不用记运算符的优先级，多用括号.
+    * NULL参与运算:NULL参与算术运算和比较运算结果都为NULL(由于比较运算的结果为逻辑值，比较运算的结果NULL表示UNKONW)。即 (5 > null) is unkown 的值为true;
+    * 对于字符串的比较使用字典顺序（ASCII码）进行比较.
+    * 判断是否为NULL要用IS NULL和IS NOT NULL，不能用"xxx = NULL"
+
+2. 逻辑运算符（AND,OR,NOT）:连接多个查询条件。
+    * 真值(逻辑值):sql中有三种真值。TRUE,FLASE,UNKOWN.
+    * 使用集合概念（将表的数据看作集合中的元素）。比较运算就是取某个集合的子集，逻辑运算就是求多个集合的and交集、or并集。not 补集.
+    * AND和OR具有短路特性。
