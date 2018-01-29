@@ -29,6 +29,10 @@
     - [函数、谓词、CASE表达式](#%E5%87%BD%E6%95%B0%E3%80%81%E8%B0%93%E8%AF%8D%E3%80%81case%E8%A1%A8%E8%BE%BE%E5%BC%8F)
         - [1. 函数](#1-%E5%87%BD%E6%95%B0)
         - [2. 谓词predicate（返回值为真值的函数）](#2-%E8%B0%93%E8%AF%8Dpredicate%EF%BC%88%E8%BF%94%E5%9B%9E%E5%80%BC%E4%B8%BA%E7%9C%9F%E5%80%BC%E7%9A%84%E5%87%BD%E6%95%B0%EF%BC%89)
+        - [3. CASE条件分支](#3-case%E6%9D%A1%E4%BB%B6%E5%88%86%E6%94%AF)
+    - [7. 集合运算（多表查询：结果之间的交集、并集、差集）](#7-%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97%EF%BC%88%E5%A4%9A%08%E8%A1%A8%E6%9F%A5%E8%AF%A2%EF%BC%9A%E7%BB%93%E6%9E%9C%E4%B9%8B%E9%97%B4%E7%9A%84%E4%BA%A4%E9%9B%86%E3%80%81%E5%B9%B6%E9%9B%86%E3%80%81%E5%B7%AE%08%E9%9B%86%EF%BC%89)
+        - [1. 以行为单位进行多表集合运算](#1-%E4%BB%A5%E8%A1%8C%E4%B8%BA%E5%8D%95%E4%BD%8D%E8%BF%9B%E8%A1%8C%E5%A4%9A%E8%A1%A8%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97)
+        - [3. 以列为单位进行多表集合运算：联结JOIN](#3-%E4%BB%A5%E5%88%97%E4%B8%BA%E5%8D%95%E4%BD%8D%E8%BF%9B%E8%A1%8C%E5%A4%9A%E8%A1%A8%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97%EF%BC%9A%E8%81%94%E7%BB%93join)
 
 ## 基本概念
 
@@ -392,9 +396,40 @@ SELECT * FROM "product"  AS p1 WHERE sale_price > (SELECT AVG(sale_price) FROM p
 
 ### 2. 谓词predicate（返回值为真值的函数）
 
-    - LIKE:字符串模糊匹配(部分一致)。
-    - BETWEEN: 两值之间。  (WHERE 10 < A AND A < 100)
-    - IS NULL,IS NOT NULL: 判断是否为NULL
-    - IN,NOT IN :判断某值是否在值列表（单1列）中。(WHERE id in (1, 2) 即 HWERE id = 1 OR id = 2;
-    - EXISTS
-    - 通配符：%，表示任意多个字符（可以是0个）；_（下划线）:任意一个字符。
+- LIKE:字符串模糊匹配(部分一致)。
+- BETWEEN: 两值之间。  (WHERE 10 < A AND A < 100)
+- IS NULL,IS NOT NULL: 判断是否为NULL
+- IN,NOT IN :判断某值是否在值列表（单1列）中。(WHERE id in (1, 2) 即 HWERE id = 1 OR id = 2;（e.g:如in中的值列表包含NULL值，也无法选取匹配NULL值的记录，如果是NOT IN中的值列表包含NULL，刷无法选取任何记录)。
+- EXISTS:判断是否存在满足某种条件的记录。是返回TRUE，否返回FALSE；（通常指定关联子查询做为EXISTS函数的参数）
+- 通配符：%，表示任意多个字符（可以是0个）；_（下划线）:任意一个字符。
+
+### 3. CASE条件分支
+
+```sql
+--当WHEN后的条件表达式为真是执行并返回同组中的THEN后的表达式。每一组WHEN,THEN表示一个分支。当所有分支条件都不成立时，执行并返回ELSE后的表达式。
+CASE
+    WHEN <条件表达式1>
+    THEN <表达试1>
+    WHEN <条件表达式2>
+    THEN <表达试2>
+    ...
+    ELSE <表达式n> --可以省略
+END
+```
+
+## 7. 集合运算（多表查询：结果之间的交集、并集、差集）
+
+### 1. 以行为单位进行多表集合运算
+
+- 集合运算默认去除重复记录，如不去重加关键字ALL，如UNION ALL.
+- 参与运算的多个查询结果的列数相同且类型一致
+- 使用ORDER BY进行排序时只能写在整个语句最后且只能写一次。
+
+1. UNION并集
+2. INTERSECT交集
+3. EXCEPT差集
+    - 求差集时，两个结合的位置不同，结果也不同。如A EXCEPT B表示：A集合在B集合中没有元素（记录）。 B EXCEPT A表示：计算B集合在A集合中没有的元素。
+
+### 3. 以列为单位进行多表集合运算：联结JOIN
+
+1. 内联接：INNER JOIN
