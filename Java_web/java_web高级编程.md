@@ -79,7 +79,7 @@ Servlet部署描述文件:WEB-INFO/web.xml
     <!--指定Servlet的名字,可以通过getServletName()方法获取-->
     <Servlet-name>name</Servlet-name>
     <!-- 指定Servlet对应的java类-->
-    <Servlet-class>class全名</Servlet-class> 
+    <Servlet-class>class全名</Servlet-class>
     <!-- 在应用程序启动之后立即启动该Servlet。标签中的数值表示如果有其他Servlet配置了该项，数值小的先启动；如果数值相同，那么按照web.xml中的出现顺序启动-->
     <load-on-startup>1</load-on-startup>
 </Servlet>
