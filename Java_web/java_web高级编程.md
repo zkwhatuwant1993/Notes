@@ -35,10 +35,10 @@
 
 ### 2. web容器/servlet容器
 
-    - tomcat（只实现了一部分标准）
-    - GlassFish(基于tomcat，完整的实现了JavaEE应用规范的服务器，包含web容器)
-    - JBoss,WildFly
-    - Jetty
+- tomcat（只实现了一部分标准）
+- GlassFish(基于tomcat，完整的实现了JavaEE应用规范的服务器，包含web容器)
+- JBoss,WildFly
+- Jetty
 
 ## 二、Servlet类
 
@@ -90,16 +90,16 @@ Servlet部署描述文件:WEB-INFO/web.xml
 1. 使用web.xml设置
     ```xml
     <!-- 告诉web容器如何创建该Servlet-->
-    <Serlvet-mapping>
+    <servlet-mapping>
     <!--指定Servlet的名字，与<Servlet>标签下的<Servlet-name>标签对应-->
     <!-- 表示映射的是哪个Servlet -->
-    <Servlet-name>name</Servlet-name>
+    <servlet-name>name</Servlet-name>
     <!-- 访问该web应用的相对URL/path的请求将由该Servlet处理-->
     <url-pattern>/path1</url-pattern>
     <!-- 可以将多个url映射到同一个Servlet-->
     <url-pattern>/path2</url-pattern>
     <url-pattern>/path3</url-pattern>
-    </Serlvet-mapping>
+    </servlet-mapping>
     ```
 2. 使用注解
     ```java
@@ -148,15 +148,15 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
 
 ##### 4. 获取Http请求特有的数据URL,URI,和头信息
 
-    - getRequestURL
-    - getRequestURI
-    - getServletPath
-    - getHeaderXXX
+- getRequestURL
+- getRequestURI
+- getServletPath
+- getHeaderXXX
 
 ##### 5.会话和Cookies
 
-    - getSession
-    - getCookies
+- getSession
+- getCookies
 
 #### 3. 使用HttpServletResonse
 
@@ -171,38 +171,41 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
 
 ##### 2. 设置头和其他response属性
 
-    - setHeaderXXX()
-    - setStatus
-    - sendError
-    - sendRedirect
+- setHeaderXXX()
+- setStatus
+- sendError
+- sendRedirect
 
 #### 4.使用初始化参数配置应用程序
 
 ##### 1. 使用Context初始化参数
 
 1. 在web.xml中配置Context参数
+
     ```xml
-    <Context-param>
+    <context-param>
         <param-name></param-name>
         <param-value></param-value>
-    </Context-param>
+    </context-param>
     ```
+
     应用程序中的所有Servlet都共享这些数据。
 
 2. 在Servlet中获取
+
     ```java
-        ServletContext context = this.getServletContext();
-        context.getInitParameter();
+    ServletContext context = this.getServletContext();
+    context.getInitParameter();
     ```
 
 ##### 2. 使用Servlet初始化参数
 
 1. 在web.xml中配置Servlet初始化参数
     ```xml
-    <Servlet>
-        <Servlet-name></Servlet-name>
-        <Servlet-class></Servlet-class>
-    </Servlet>
+    <servlet>
+        <servlet-name></servlet-name>
+        <servlet-class></servlet-class>
+    </servlet>
     <init-param>
             <param-name>p1</param-name>
             <param-value>v1</param-value>
@@ -214,8 +217,8 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
     ```
 2. 在Servlet中获取
     ```java
-        ServletConfig config = this.getServletConfig();
-        config.getInitParameter();
+    ServletConfig config = this.getServletConfig();
+    config.getInitParameter();
     ```
 3. 使用注解
      ```java
