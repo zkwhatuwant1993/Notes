@@ -26,6 +26,12 @@
             - [4.使用初始化参数配置应用程序](#4%E4%BD%BF%E7%94%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F)
                 - [1. 使用Context初始化参数](#1-%E4%BD%BF%E7%94%A8context%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
                 - [2. 使用Servlet初始化参数](#2-%E4%BD%BF%E7%94%A8servlet%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
+            - [5. 通过表单上传文件:Servlet的multipart-config及Http-response的header设置(attachment)](#5-%E9%80%9A%E8%BF%87%E8%A1%A8%E5%8D%95%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6servlet%E7%9A%84multipart-config%E5%8F%8Ahttp-response%E7%9A%84header%E8%AE%BE%E7%BD%AEattachment)
+            - [6. 编写多线程安全的应用程序](#6-%E7%BC%96%E5%86%99%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F)
+                - [1. 理解请求、线程、方法执行](#1-%E7%90%86%E8%A7%A3%E8%AF%B7%E6%B1%82%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E6%96%B9%E6%B3%95%E6%89%A7%E8%A1%8C)
+                - [2. 保护共享资源：多线程的典型问题，即资源竞争（处理不好会导致死锁）。](#2-%E4%BF%9D%E6%8A%A4%E5%85%B1%E4%BA%AB%E8%B5%84%E6%BA%90%EF%BC%9A%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%85%B8%E5%9E%8B%E9%97%AE%E9%A2%98%EF%BC%8C%E5%8D%B3%E8%B5%84%E6%BA%90%E7%AB%9E%E4%BA%89%EF%BC%88%E5%A4%84%E7%90%86%E4%B8%8D%E5%A5%BD%E4%BC%9A%E5%AF%BC%E8%87%B4%E6%AD%BB%E9%94%81%EF%BC%89%E3%80%82)
+        - [三. JSP的基本规则：JAVA模板引擎(用于代替手动拼接字符串，但其本质还是做页面字符串的拼接)。](#%E4%B8%89-jsp%E7%9A%84%E5%9F%BA%E6%9C%AC%E8%A7%84%E5%88%99%EF%BC%9Ajava%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E%E7%94%A8%E4%BA%8E%E4%BB%A3%E6%9B%BF%E6%89%8B%E5%8A%A8%E6%8B%BC%E6%8E%A5%E5%AD%97%E7%AC%A6%E4%B8%B2%EF%BC%8C%E4%BD%86%E5%85%B6%E6%9C%AC%E8%B4%A8%E8%BF%98%E6%98%AF%E5%81%9A%E9%A1%B5%E9%9D%A2%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%8B%BC%E6%8E%A5%E3%80%82)
+            - [1.JSP的运行原理(本质是一个Servlet)](#1jsp%E7%9A%84%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86%E6%9C%AC%E8%B4%A8%E6%98%AF%E4%B8%80%E4%B8%AAservlet)
 
 勘误表：http:www.wrox.com/go/projavaforwebapps
 
@@ -235,3 +241,63 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
 4. 使用xml配置和使用注解配置的区别
    - 使用注解:参数如果需要修改，那么修改后需要重新编译应用程序才能生效.
    - 使用xml:参数修改后，重启应用程序即可生效。
+
+#### 5. 通过表单上传文件:Servlet的multipart-config及Http-response的header设置(attachment)
+
+1. 在web.xml中配置Servlet
+    ```xml
+    <servlet>
+        <servlet-name></servlet-name>
+        <servlet-class></servlet-class>
+        <multipart-config>
+            <location></location>
+            <file-size-threshold></file-size-threshold>
+            <max-file-size></max-file-size>
+            <max-request-size></max-request-size>
+        </multipart-config>
+    </servlet>
+    ```
+
+2. 使用注解
+    ```java
+      ```java
+    @WebServlet(
+        name = "servletName",
+        urlPatterns = {"/url-pattern1","/url-pattern2"...},
+        initParams = {
+        @WebInitParam(name = "name1",value = "value1"),
+        @WebInitParam(name = "name2",value = "value2")
+        }
+    )
+    @MultipartConfig(
+        fileSizeThreshold = 5_242_880, //5MB
+        maxFileSize = 20_971_520L, //20MB
+        maxRequestSize = 41_943_040L //40MB
+    )
+    class MyServlet extends HttpServlet{}
+    ```
+
+#### 6. 编写多线程安全的应用程序
+
+##### 1. 理解请求、线程、方法执行
+
+**为什么需要线程池**：创建和销毁线程会产生许多开销，这会降低application的运行速度，所以采用可利用的线程组成的线程池可以减少这种开销，提高性能。但是在也要特别注意多线程下的安全问题。
+
+请求队列：当容器收到请求，它将在线程池中寻找可以用线程。如果找不到，并且线程池已经达到了最大线程数，那么该请求就会被放入一个队列(先进先出)中，等待获取可用的线程来处理该请求。一旦一个线程被用来处理某个请求，那么它对其他请求来说是不可用的（贯穿整个请求的生命周期），只有请求被处理，response已经发送到客户端后，该线程才会变成可用状态并返回到线程池中，用于处理下一个请求。
+
+tips:有也**异步**的处理方式，此时线程池不与Servlet的生命周期绑定。
+
+##### 2. 保护共享资源：多线程的典型问题，即资源竞争（处理不好会导致死锁）。
+
+1. 一个Servlet中的静态变量和成员变量都能同时被多个线程访问，所以多线程环境下需要做处理，如使用volitle关键字(保证编译器不做优化，每次读取都是最新值)，将访问共享资源的代码放在同步块中。
+2. 所以永远不要在Servlet中使用静态变量和成员变量来存储request和response对象，因为任何属于request和response对象的资源都应该只用作本地变量和参数。
+
+### 三. JSP的基本规则：JAVA模板引擎(用于代替手动拼接字符串，但其本质还是做页面字符串的拼接)。
+
+- JAVA模板引擎出现的原因：手动拼接页面字符串随着页面的复杂程度难以阅读和维护。用于代替手动拼接字符串，但其本质还是做页面字符串的拼接
+- JAVA模板引擎：用来渲染及展示web页面。常见的有JSP,Velocity, Freemaker,Thymeleaf.
+- JSP可以使用：HTML标签,内置的JSP标签,自定义JSP标签,EL。
+
+#### 1.JSP的运行原理(本质是一个Servlet)
+
+JSP是一个精心设计的Servlet，在运行时JSP代码将由JSP编译器转换进行转换，它将解析出JSP代码的所有特征并生成对应的JAVA代码，由JSP转换得到的JAVA类都继承了Servlet类。
