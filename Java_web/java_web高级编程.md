@@ -23,15 +23,20 @@
             - [3. 使用HttpServletResonse](#3-%E4%BD%BF%E7%94%A8httpservletresonse)
                 - [1. 编写响应正文](#1-%E7%BC%96%E5%86%99%E5%93%8D%E5%BA%94%E6%AD%A3%E6%96%87)
                 - [2. 设置头和其他response属性](#2-%E8%AE%BE%E7%BD%AE%E5%A4%B4%E5%92%8C%E5%85%B6%E4%BB%96response%E5%B1%9E%E6%80%A7)
-            - [4.使用初始化参数配置应用程序](#4%E4%BD%BF%E7%94%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F)
-                - [1. 使用Context初始化参数](#1-%E4%BD%BF%E7%94%A8context%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
-                - [2. 使用Servlet初始化参数](#2-%E4%BD%BF%E7%94%A8servlet%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
-            - [5. 通过表单上传文件:Servlet的multipart-config及Http-response的header设置(attachment)](#5-%E9%80%9A%E8%BF%87%E8%A1%A8%E5%8D%95%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6servlet%E7%9A%84multipart-config%E5%8F%8Ahttp-response%E7%9A%84header%E8%AE%BE%E7%BD%AEattachment)
-            - [6. 编写多线程安全的应用程序](#6-%E7%BC%96%E5%86%99%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F)
-                - [1. 理解请求、线程、方法执行](#1-%E7%90%86%E8%A7%A3%E8%AF%B7%E6%B1%82%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E6%96%B9%E6%B3%95%E6%89%A7%E8%A1%8C)
-                - [2. 保护共享资源：多线程的典型问题，即资源竞争（处理不好会导致死锁）。](#2-%E4%BF%9D%E6%8A%A4%E5%85%B1%E4%BA%AB%E8%B5%84%E6%BA%90%EF%BC%9A%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%85%B8%E5%9E%8B%E9%97%AE%E9%A2%98%EF%BC%8C%E5%8D%B3%E8%B5%84%E6%BA%90%E7%AB%9E%E4%BA%89%EF%BC%88%E5%A4%84%E7%90%86%E4%B8%8D%E5%A5%BD%E4%BC%9A%E5%AF%BC%E8%87%B4%E6%AD%BB%E9%94%81%EF%BC%89%E3%80%82)
-        - [三. JSP的基本规则：JAVA模板引擎(用于代替手动拼接字符串，但其本质还是做页面字符串的拼接)。](#%E4%B8%89-jsp%E7%9A%84%E5%9F%BA%E6%9C%AC%E8%A7%84%E5%88%99%EF%BC%9Ajava%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E%E7%94%A8%E4%BA%8E%E4%BB%A3%E6%9B%BF%E6%89%8B%E5%8A%A8%E6%8B%BC%E6%8E%A5%E5%AD%97%E7%AC%A6%E4%B8%B2%EF%BC%8C%E4%BD%86%E5%85%B6%E6%9C%AC%E8%B4%A8%E8%BF%98%E6%98%AF%E5%81%9A%E9%A1%B5%E9%9D%A2%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%8B%BC%E6%8E%A5%E3%80%82)
-            - [1.JSP的运行原理(本质是一个Servlet)](#1jsp%E7%9A%84%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86%E6%9C%AC%E8%B4%A8%E6%98%AF%E4%B8%80%E4%B8%AAservlet)
+        - [4.使用初始化参数配置应用程序](#4%E4%BD%BF%E7%94%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F)
+            - [1. 使用Context初始化参数](#1-%E4%BD%BF%E7%94%A8context%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
+            - [2. 使用Servlet初始化参数](#2-%E4%BD%BF%E7%94%A8servlet%E5%88%9D%E5%A7%8B%E5%8C%96%E5%8F%82%E6%95%B0)
+        - [5. 通过表单上传文件:Servlet的multipart-config及Http-response的header设置(attachment)](#5-%E9%80%9A%E8%BF%87%E8%A1%A8%E5%8D%95%E4%B8%8A%E4%BC%A0%E6%96%87%E4%BB%B6servlet%E7%9A%84multipart-config%E5%8F%8Ahttp-response%E7%9A%84header%E8%AE%BE%E7%BD%AEattachment)
+        - [6. 编写多线程安全的应用程序](#6-%E7%BC%96%E5%86%99%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F)
+            - [1. 理解请求、线程、方法执行](#1-%E7%90%86%E8%A7%A3%E8%AF%B7%E6%B1%82%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E6%96%B9%E6%B3%95%E6%89%A7%E8%A1%8C)
+            - [2. 保护共享资源：多线程的典型问题，即资源竞争（处理不好会导致死锁）。](#2-%E4%BF%9D%E6%8A%A4%E5%85%B1%E4%BA%AB%E8%B5%84%E6%BA%90%EF%BC%9A%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%85%B8%E5%9E%8B%E9%97%AE%E9%A2%98%EF%BC%8C%E5%8D%B3%E8%B5%84%E6%BA%90%E7%AB%9E%E4%BA%89%EF%BC%88%E5%A4%84%E7%90%86%E4%B8%8D%E5%A5%BD%E4%BC%9A%E5%AF%BC%E8%87%B4%E6%AD%BB%E9%94%81%EF%BC%89%E3%80%82)
+    - [三. JSP的基本规则：JAVA模板引擎(用于代替手动拼接字符串，但其本质还是做页面字符串的拼接)。](#%E4%B8%89-jsp%E7%9A%84%E5%9F%BA%E6%9C%AC%E8%A7%84%E5%88%99%EF%BC%9Ajava%E6%A8%A1%E6%9D%BF%E5%BC%95%E6%93%8E%E7%94%A8%E4%BA%8E%E4%BB%A3%E6%9B%BF%E6%89%8B%E5%8A%A8%E6%8B%BC%E6%8E%A5%E5%AD%97%E7%AC%A6%E4%B8%B2%EF%BC%8C%E4%BD%86%E5%85%B6%E6%9C%AC%E8%B4%A8%E8%BF%98%E6%98%AF%E5%81%9A%E9%A1%B5%E9%9D%A2%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%8B%BC%E6%8E%A5%E3%80%82)
+        - [1.JSP的运行原理(本质是一个Servlet)](#1jsp%E7%9A%84%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86%E6%9C%AC%E8%B4%A8%E6%98%AF%E4%B8%80%E4%B8%AAservlet)
+        - [2. 指令、声明、脚本和表达式](#2-%E6%8C%87%E4%BB%A4%E3%80%81%E5%A3%B0%E6%98%8E%E3%80%81%E8%84%9A%E6%9C%AC%E5%92%8C%E8%A1%A8%E8%BE%BE%E5%BC%8F)
+        - [3. 注释代码](#3-%E6%B3%A8%E9%87%8A%E4%BB%A3%E7%A0%81)
+        - [4. 在JSP中导入JAVA类:导入指令](#4-%E5%9C%A8jsp%E4%B8%AD%E5%AF%BC%E5%85%A5java%E7%B1%BB%E5%AF%BC%E5%85%A5%E6%8C%87%E4%BB%A4)
+        - [5. 常用指令](#5-%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4)
+            - [1. 修改页面属性](#1-%E4%BF%AE%E6%94%B9%E9%A1%B5%E9%9D%A2%E5%B1%9E%E6%80%A7)
 
 勘误表：http:www.wrox.com/go/projavaforwebapps
 
@@ -182,9 +187,9 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
 - sendError
 - sendRedirect
 
-#### 4.使用初始化参数配置应用程序
+### 4.使用初始化参数配置应用程序
 
-##### 1. 使用Context初始化参数
+#### 1. 使用Context初始化参数
 
 1. 在web.xml中配置Context参数
 
@@ -204,7 +209,7 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
     context.getInitParameter();
     ```
 
-##### 2. 使用Servlet初始化参数
+#### 2. 使用Servlet初始化参数
 
 1. 在web.xml中配置Servlet初始化参数
     ```xml
@@ -217,8 +222,8 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
             <param-value>v1</param-value>
         </init-param>
     <init-param>
-        <param-name>p1</param-name>
-        <param-value>v1</param-value>
+        <param-name>p2</param-name>
+        <param-value>v2</param-value>
     </init-param>
     ```
 2. 在Servlet中获取
@@ -242,7 +247,7 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
    - 使用注解:参数如果需要修改，那么修改后需要重新编译应用程序才能生效.
    - 使用xml:参数修改后，重启应用程序即可生效。
 
-#### 5. 通过表单上传文件:Servlet的multipart-config及Http-response的header设置(attachment)
+### 5. 通过表单上传文件:Servlet的multipart-config及Http-response的header设置(attachment)
 
 1. 在web.xml中配置Servlet
     ```xml
@@ -277,9 +282,9 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
     class MyServlet extends HttpServlet{}
     ```
 
-#### 6. 编写多线程安全的应用程序
+### 6. 编写多线程安全的应用程序
 
-##### 1. 理解请求、线程、方法执行
+#### 1. 理解请求、线程、方法执行
 
 **为什么需要线程池**：创建和销毁线程会产生许多开销，这会降低application的运行速度，所以采用可利用的线程组成的线程池可以减少这种开销，提高性能。但是在也要特别注意多线程下的安全问题。
 
@@ -287,17 +292,67 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
 
 tips:有也**异步**的处理方式，此时线程池不与Servlet的生命周期绑定。
 
-##### 2. 保护共享资源：多线程的典型问题，即资源竞争（处理不好会导致死锁）。
+#### 2. 保护共享资源：多线程的典型问题，即资源竞争（处理不好会导致死锁）。
 
 1. 一个Servlet中的静态变量和成员变量都能同时被多个线程访问，所以多线程环境下需要做处理，如使用volitle关键字(保证编译器不做优化，每次读取都是最新值)，将访问共享资源的代码放在同步块中。
 2. 所以永远不要在Servlet中使用静态变量和成员变量来存储request和response对象，因为任何属于request和response对象的资源都应该只用作本地变量和参数。
 
-### 三. JSP的基本规则：JAVA模板引擎(用于代替手动拼接字符串，但其本质还是做页面字符串的拼接)。
+## 三. JSP的基本规则：JAVA模板引擎(用于代替手动拼接字符串，但其本质还是做页面字符串的拼接)。
 
 - JAVA模板引擎出现的原因：手动拼接页面字符串随着页面的复杂程度难以阅读和维护。用于代替手动拼接字符串，但其本质还是做页面字符串的拼接
 - JAVA模板引擎：用来渲染及展示web页面。常见的有JSP,Velocity, Freemaker,Thymeleaf.
 - JSP可以使用：HTML标签,内置的JSP标签,自定义JSP标签,EL。
 
-#### 1.JSP的运行原理(本质是一个Servlet)
+### 1.JSP的运行原理(本质是一个Servlet)
 
-JSP是一个精心设计的Servlet，在运行时JSP代码将由JSP编译器转换进行转换，它将解析出JSP代码的所有特征并生成对应的JAVA代码，由JSP转换得到的JAVA类都继承了Servlet类。
+JSP是一个精心设计的Servlet，在运行时JSP代码将由JSP编译器转换进行转换，它将解析出JSP代码的所有特征并生成对应的JAVA代码，由JSP转换得到的JAVA类都继承了Servlet类，有其生命周期。
+
+### 2. 指令、声明、脚本和表达式
+
+```xml
+<%@ 指令内容 %>
+<%! 声明内容 %>
+<% 脚本内容 %>
+<%= 表达式 %>
+```
+
+1. 使用指令
+
+    指令用于指示JSP解释器执行某个操作(例如设置内容类型)或者对文件作出假设（例如声明脚本语言的类型）、导入类、在转换时包含的其他JSP或者包含JSP标签库
+
+2. 使用声明
+
+    声明用于在JSPServlet类的范围内**声明一些东西**（即定义**成员**变量，方法或声明标签中的类），这些声明都将在JSP转换为Servlet类时添加到内的主体中（即作用域是整个类），所以声明中定义的类实际 上是Servlet的内部类。
+
+3. 使用脚本
+
+    和声明一样，脚本中也包含了JAVA代码，这些代码会在JSP转换时添加到_jspService方法体中（即作用域为局部）。该方法中所有的局部变量都可以在脚本中使用，任何在该方法中合法的代码在脚本中也是合法的。另外还可以使用条件语句、操作对象和执行数学计算，这些在声明中是无法完成的。
+
+4. 使用表达式
+
+    表达式可用于向客户端输出内容，它将把代码的返回值输出到客户端，任何赋值表达式的整个右侧都可以用在表达式中。表达式的作用域与脚本相同。
+
+### 3. 注释代码
+
+1. xml注释：<!-- -->
+2. java行注释 //
+3. java块注释 /* */
+4. JSP注释 <%-- --%>
+
+用JSP注释包含的内容，不仅不会发送到浏览器，编辑器不会解释和转换它们（忽略）。其他3种注释里的内容都会添加到JSPServlet类中。
+
+### 4. 在JSP中导入JAVA类:导入指令
+
+```xml
+<!-- JSP默认导入java.lang包里的类-->
+<%@ import="java.util.*,java.io.IOException" %>
+```
+
+**注意**：对于不产生输出的JSP标记、声明、指令和脚本，它们都会向客户端输出一行空白。
+
+### 5. 常用指令
+
+#### 1. 修改页面属性
+
+- pageEncoding
+- pageEncoding
