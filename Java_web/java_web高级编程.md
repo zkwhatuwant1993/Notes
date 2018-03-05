@@ -265,7 +265,6 @@ Servlet容器创建一个HttpServletRequest的实例并将该对象做为参数�
 
 2. 使用注解
     ```java
-      ```java
     @WebServlet(
         name = "servletName",
         urlPatterns = {"/url-pattern1","/url-pattern2"...},
