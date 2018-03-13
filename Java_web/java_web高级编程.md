@@ -47,7 +47,7 @@
             - [7.1 JSP属性的复用：在配置文件web.xml中设置JSP属性，使用jsp-config标签](#71-jsp%E5%B1%9E%E6%80%A7%E7%9A%84%E5%A4%8D%E7%94%A8%EF%BC%9A%E5%9C%A8%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6webxml%E4%B8%AD%E8%AE%BE%E7%BD%AEjsp%E5%B1%9E%E6%80%A7%EF%BC%8C%E4%BD%BF%E7%94%A8jsp-config%E6%A0%87%E7%AD%BE)
                 - [7.1.1 匹配不同的JSP属性：jsp属性组jsp-property-group](#711-%E5%8C%B9%E9%85%8D%E4%B8%8D%E5%90%8C%E7%9A%84jsp%E5%B1%9E%E6%80%A7%EF%BC%9Ajsp%E5%B1%9E%E6%80%A7%E7%BB%84jsp-property-group)
                 - [7.1.2 jsp属性](#712-jsp%E5%B1%9E%E6%80%A7)
-            - [7. 将Servlet中的请求转换发给JSP](#7-%E5%B0%86servlet%E4%B8%AD%E7%9A%84%E8%AF%B7%E6%B1%82%E8%BD%AC%E6%8D%A2%E5%8F%91%E7%BB%99jsp)
+            - [7. 将Servlet中的**请求转发**给JSP](#7-%E5%B0%86servlet%E4%B8%AD%E7%9A%84%E8%AF%B7%E6%B1%82%E8%BD%AC%E5%8F%91%E7%BB%99jsp)
 
 勘误表：http:www.wrox.com/go/projavaforwebapps
 
@@ -438,7 +438,7 @@ JSP规范要求JSP的转换器和编译器提供这些变量，并且名字也�
 </jsp-config>
 ```
 
-- 如果应用程序中的某些文件同时匹配**serlvet-mapping**和JSP属性组中的**url-pattern**，那么更精确（相对于模糊）的URL会匹配成功。
+- 如果应用程序中的某些文件同时匹配**serlvet-mapping**和JSP属性组中的**url-pattern**，那么更精确（相对于模糊）的URL会匹配成功，如果两者的url-pattern是一致的，那么优先匹配属性组而不是Servlet映射。
 - 如果某些文件同时匹配多个属性组中的**url-pattern**,那么更精确（相对于模糊）的URL会匹配成功。如果多个匹配一致，那么按照在web.xml中的书写顺序，这些pattern中的第一个将成功匹配。
 - 如果有文件同时匹配多个属性组中的**url-pattern**,并且这些属性组还包含了**include-prelude**或**include-coda**属性，那么这些属性将同时作用于该文件（因为一个jsp可以包含多个**其他**jsp文件）,但是只有一个组（根据上面两条规则匹配成功的属性组）的其他属性能够对该文件生效
 
@@ -446,6 +446,8 @@ JSP规范要求JSP的转换器和编译器提供这些变量，并且名字也�
 
 除了jsp-property-group标签和其下的url-pattern标签是必要的，其他jsp属性可选，但是在添加他们的时候有严格顺序（顺序略）。
 
-#### 7. 将Servlet中的请求转换发给JSP
+#### 7. 将Servlet中的**请求转发**给JSP
 
-2
+由Sevlet处理业务逻辑以及必需的数据存储或者读取，然后创建可以由JSP轻松处理的数据模型，最终将请求转发给JSP.
+
+请求转发与重定向的区别:重定向会改变客户浏览器的URL并且收到重定向的状态码，请求转发不会。
