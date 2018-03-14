@@ -47,7 +47,16 @@
             - [7.1 JSP属性的复用：在配置文件web.xml中设置JSP属性，使用jsp-config标签](#71-jsp%E5%B1%9E%E6%80%A7%E7%9A%84%E5%A4%8D%E7%94%A8%EF%BC%9A%E5%9C%A8%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6webxml%E4%B8%AD%E8%AE%BE%E7%BD%AEjsp%E5%B1%9E%E6%80%A7%EF%BC%8C%E4%BD%BF%E7%94%A8jsp-config%E6%A0%87%E7%AD%BE)
                 - [7.1.1 匹配不同的JSP属性：jsp属性组jsp-property-group](#711-%E5%8C%B9%E9%85%8D%E4%B8%8D%E5%90%8C%E7%9A%84jsp%E5%B1%9E%E6%80%A7%EF%BC%9Ajsp%E5%B1%9E%E6%80%A7%E7%BB%84jsp-property-group)
                 - [7.1.2 jsp属性](#712-jsp%E5%B1%9E%E6%80%A7)
-            - [7. 将Servlet中的**请求转发**给JSP](#7-%E5%B0%86servlet%E4%B8%AD%E7%9A%84%E8%AF%B7%E6%B1%82%E8%BD%AC%E5%8F%91%E7%BB%99jsp)
+            - [7.2 将Servlet中的**请求转发**给JSP](#72-%E5%B0%86servlet%E4%B8%AD%E7%9A%84%E8%AF%B7%E6%B1%82%E8%BD%AC%E5%8F%91%E7%BB%99jsp)
+            - [7.3 关于JSP文档(JSPX)：使用xml文档来实现JSP](#73-%E5%85%B3%E4%BA%8Ejsp%E6%96%87%E6%A1%A3jspx%EF%BC%9A%E4%BD%BF%E7%94%A8xml%E6%96%87%E6%A1%A3%E6%9D%A5%E5%AE%9E%E7%8E%B0jsp)
+    - [4. 会话(Session):维持状态](#4-%E4%BC%9A%E8%AF%9Dsession%E7%BB%B4%E6%8C%81%E7%8A%B6%E6%80%81)
+        - [4.1 使用会话的原因](#41-%E4%BD%BF%E7%94%A8%E4%BC%9A%E8%AF%9D%E7%9A%84%E5%8E%9F%E5%9B%A0)
+            - [4.1.1 维持状态](#411-%E7%BB%B4%E6%8C%81%E7%8A%B6%E6%80%81)
+            - [4.1.2 记住用户](#412-%E8%AE%B0%E4%BD%8F%E7%94%A8%E6%88%B7)
+            - [4.1.3 应用程序工程流](#413-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%B7%A5%E7%A8%8B%E6%B5%81)
+        - [4.2 使用cookie和URL参数](#42-%E4%BD%BF%E7%94%A8cookie%E5%92%8Curl%E5%8F%82%E6%95%B0)
+        - [4.3 在Session中存储数据](#43-%E5%9C%A8session%E4%B8%AD%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE)
+        - [4.4 使用Session](#44-%E4%BD%BF%E7%94%A8session)
 
 勘误表：http:www.wrox.com/go/projavaforwebapps
 
@@ -446,8 +455,31 @@ JSP规范要求JSP的转换器和编译器提供这些变量，并且名字也�
 
 除了jsp-property-group标签和其下的url-pattern标签是必要的，其他jsp属性可选，但是在添加他们的时候有严格顺序（顺序略）。
 
-#### 7. 将Servlet中的**请求转发**给JSP
+#### 7.2 将Servlet中的**请求转发**给JSP
 
 由Sevlet处理业务逻辑以及必需的数据存储或者读取，然后创建可以由JSP轻松处理的数据模型，最终将请求转发给JSP.
 
 请求转发与重定向的区别:重定向会改变客户浏览器的URL并且收到重定向的状态码，请求转发不会。
+
+#### 7.3 关于JSP文档(JSPX)：使用xml文档来实现JSP
+
+## 4. 会话(Session):维持状态
+
+### 4.1 使用会话的原因
+
+关联同一用户的多个请求。
+
+#### 4.1.1 维持状态
+
+会话用于维护请求与请求之间的状态，Http请求自身是无状态的.从服务器的角度来说，当用户的Web浏览器打开第一个连接到服务器的套接字时请求就开始了，直到服务器返回最后一个数据包并关闭连接时，该请求结束。
+
+#### 4.1.2 记住用户
+
+#### 4.1.3 应用程序工程流
+
+### 4.2 使用cookie和URL参数
+
+
+### 4.3 在Session中存储数据
+
+### 4.4 使用Session
