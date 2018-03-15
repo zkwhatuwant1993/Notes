@@ -47,7 +47,30 @@
             - [7.1 JSP属性的复用：在配置文件web.xml中设置JSP属性，使用jsp-config标签](#71-jsp%E5%B1%9E%E6%80%A7%E7%9A%84%E5%A4%8D%E7%94%A8%EF%BC%9A%E5%9C%A8%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6webxml%E4%B8%AD%E8%AE%BE%E7%BD%AEjsp%E5%B1%9E%E6%80%A7%EF%BC%8C%E4%BD%BF%E7%94%A8jsp-config%E6%A0%87%E7%AD%BE)
                 - [7.1.1 匹配不同的JSP属性：jsp属性组jsp-property-group](#711-%E5%8C%B9%E9%85%8D%E4%B8%8D%E5%90%8C%E7%9A%84jsp%E5%B1%9E%E6%80%A7%EF%BC%9Ajsp%E5%B1%9E%E6%80%A7%E7%BB%84jsp-property-group)
                 - [7.1.2 jsp属性](#712-jsp%E5%B1%9E%E6%80%A7)
-            - [7. 将Servlet中的请求转换发给JSP](#7-%E5%B0%86servlet%E4%B8%AD%E7%9A%84%E8%AF%B7%E6%B1%82%E8%BD%AC%E6%8D%A2%E5%8F%91%E7%BB%99jsp)
+            - [7.2 将Servlet中的**请求转发**给JSP](#72-%E5%B0%86servlet%E4%B8%AD%E7%9A%84%E8%AF%B7%E6%B1%82%E8%BD%AC%E5%8F%91%E7%BB%99jsp)
+            - [7.3 关于JSP文档(JSPX)：使用xml文档来实现JSP](#73-%E5%85%B3%E4%BA%8Ejsp%E6%96%87%E6%A1%A3jspx%EF%BC%9A%E4%BD%BF%E7%94%A8xml%E6%96%87%E6%A1%A3%E6%9D%A5%E5%AE%9E%E7%8E%B0jsp)
+<<<<<<< HEAD
+    - [四、会话(Session):维持状态](#%E5%9B%9B%E3%80%81%E4%BC%9A%E8%AF%9Dsession%E7%BB%B4%E6%8C%81%E7%8A%B6%E6%80%81)
+        - [4.1 使用会话的原因](#41-%E4%BD%BF%E7%94%A8%E4%BC%9A%E8%AF%9D%E7%9A%84%E5%8E%9F%E5%9B%A0)
+            - [4.1.1 维持状态](#411-%E7%BB%B4%E6%8C%81%E7%8A%B6%E6%80%81)
+            - [4.1.2 记住用户](#412-%E8%AE%B0%E4%BD%8F%E7%94%A8%E6%88%B7)
+            - [4.1.3 应用程序工作流](#413-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%B7%A5%E4%BD%9C%E6%B5%81)
+        - [4.2 使用cookie和URL参数](#42-%E4%BD%BF%E7%94%A8cookie%E5%92%8Curl%E5%8F%82%E6%95%B0)
+            - [4.2.1 了解cookie](#421-%E4%BA%86%E8%A7%A3cookie)
+            - [4.2.2 URL中的Session ID](#422-url%E4%B8%AD%E7%9A%84session-id)
+            - [4.2.3 Session中的漏洞](#423-session%E4%B8%AD%E7%9A%84%E6%BC%8F%E6%B4%9E)
+        - [4.3 在Session中存储数据](#43-%E5%9C%A8session%E4%B8%AD%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE)
+            - [4.3.1 在web.xml中配置Session](#431-%E5%9C%A8webxml%E4%B8%AD%E9%85%8D%E7%BD%AEsession)
+=======
+    - [4. 会话(Session):维持状态](#4-%E4%BC%9A%E8%AF%9Dsession%E7%BB%B4%E6%8C%81%E7%8A%B6%E6%80%81)
+        - [4.1 使用会话的原因](#41-%E4%BD%BF%E7%94%A8%E4%BC%9A%E8%AF%9D%E7%9A%84%E5%8E%9F%E5%9B%A0)
+            - [4.1.1 维持状态](#411-%E7%BB%B4%E6%8C%81%E7%8A%B6%E6%80%81)
+            - [4.1.2 记住用户](#412-%E8%AE%B0%E4%BD%8F%E7%94%A8%E6%88%B7)
+            - [4.1.3 应用程序工程流](#413-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%B7%A5%E7%A8%8B%E6%B5%81)
+        - [4.2 使用cookie和URL参数](#42-%E4%BD%BF%E7%94%A8cookie%E5%92%8Curl%E5%8F%82%E6%95%B0)
+        - [4.3 在Session中存储数据](#43-%E5%9C%A8session%E4%B8%AD%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE)
+>>>>>>> d191fb1358de5aa97bf6710ff1fa759d14117628
+        - [4.4 使用Session](#44-%E4%BD%BF%E7%94%A8session)
 
 勘误表：http:www.wrox.com/go/projavaforwebapps
 
@@ -438,7 +461,7 @@ JSP规范要求JSP的转换器和编译器提供这些变量，并且名字也�
 </jsp-config>
 ```
 
-- 如果应用程序中的某些文件同时匹配**serlvet-mapping**和JSP属性组中的**url-pattern**，那么更精确（相对于模糊）的URL会匹配成功。
+- 如果应用程序中的某些文件同时匹配**serlvet-mapping**和JSP属性组中的**url-pattern**，那么更精确（相对于模糊）的URL会匹配成功，如果两者的url-pattern是一致的，那么优先匹配属性组而不是Servlet映射。
 - 如果某些文件同时匹配多个属性组中的**url-pattern**,那么更精确（相对于模糊）的URL会匹配成功。如果多个匹配一致，那么按照在web.xml中的书写顺序，这些pattern中的第一个将成功匹配。
 - 如果有文件同时匹配多个属性组中的**url-pattern**,并且这些属性组还包含了**include-prelude**或**include-coda**属性，那么这些属性将同时作用于该文件（因为一个jsp可以包含多个**其他**jsp文件）,但是只有一个组（根据上面两条规则匹配成功的属性组）的其他属性能够对该文件生效
 
@@ -446,6 +469,102 @@ JSP规范要求JSP的转换器和编译器提供这些变量，并且名字也�
 
 除了jsp-property-group标签和其下的url-pattern标签是必要的，其他jsp属性可选，但是在添加他们的时候有严格顺序（顺序略）。
 
-#### 7. 将Servlet中的请求转换发给JSP
+#### 7.2 将Servlet中的**请求转发**给JSP
 
-1
+由Sevlet处理业务逻辑以及必需的数据存储或者读取，然后创建可以由JSP轻松处理的数据模型，最终将请求转发给JSP.
+
+请求转发与重定向的区别:重定向会改变客户浏览器的URL并且收到重定向的状态码，请求转发不会。
+
+#### 7.3 关于JSP文档(JSPX)：使用xml文档来实现JSP
+
+<<<<<<< HEAD
+## 四、会话(Session):维持状态
+=======
+## 4. 会话(Session):维持状态
+>>>>>>> d191fb1358de5aa97bf6710ff1fa759d14117628
+
+### 4.1 使用会话的原因
+
+关联同一用户的多个请求。
+
+#### 4.1.1 维持状态
+
+会话用于维护请求与请求之间的状态，Http请求自身是无状态的.从服务器的角度来说，当用户的Web浏览器打开第一个连接到服务器的套接字时请求就开始了，直到服务器返回最后一个数据包并关闭连接时，该请求结束。
+
+#### 4.1.2 记住用户
+
+<<<<<<< HEAD
+#### 4.1.3 应用程序工作流
+
+### 4.2 使用cookie和URL参数
+
+web会话的基本理论和JavaEE Web应用程序中会话实现规范
+
+web会话的基本理论:会话是由服务器或Web应用程序管理的某些数据（文件、内存片段对象或者容器），它包含了分配给他的各种不同数据。用户浏览器中不用保持或维持任何此类数据。
+
+Session ID:关联用户浏览器和容器，随机生成的字符串(随机：防止会话劫持)。
+
+**http会话流程**：略。
+
+cookie和URL重写：将Session ID从服务器返回给用户浏览器，并在该浏览器之后的请求中包含此ID。
+
+#### 4.2.1 了解cookie
+
+#### 4.2.2 URL中的Session ID
+
+请求URL中的Session ID的产生：包含在应用程序返回的response中的Location头和返回页面的所有URL里(超链接，表单，重定向)。
+
+**JavaEE Servlet API中的解决方案**：HttpServletResponse接口定义了两个可以重写URL的方法：encodeURL和encodeRedirectURL,它们都将在必须的时候把Session ID内嵌在URL中。需要满足以下4个条件：
+
+- 会话对于当前请求是活跃的
+- JSESSIONID cookie在请求中不存在
+- URL不是绝对URL，并且都是同一WebAPP中的URL
+- 在web.xml中启用了对会话URL重写的支持。
+
+注：另一种方案是使用JSTL。
+
+#### 4.2.3 Session中的漏洞
+
+相关请访问Open Web Application Security Project(OWASP):<https://www.owasp.org/>
+
+- 复制粘贴错误（暴露Session ID）
+- 会话固定(分享带有SessionID的URL,当其他人访问该URL使用了该SessionID，等同于SessionID暴露了)
+- 跨站脚本(如JavaScript)和Session劫持
+- 不安全的cookie：MitM攻击。
+
+最安全的防护：使用SSL/TLS会话ID
+
+### 4.3 在Session中存储数据
+
+#### 4.3.1 在web.xml中配置Session
+
+```xml
+<!-- 书写顺序固定 -->
+<session-config>
+    <session-timeout>30</session-timeout>
+    <cookie-config>
+        <name>JSESSIONID</name>
+        <domain>xxx.com</domain>
+        <path>/path</path>
+        <comment><![CDATA[comment]]></comment>
+        <http-only>true</http-only>
+        <max-age>seconds</max-age>
+        <tracking-mode>COOKIE</tracking-mode>
+        <tracking-mode>URL</tracking-mode>
+        <tracking-mode>SSL</tracking-mode>
+    </cookie-config>
+</session-config>
+```
+
+注：也可以代码中配置。
+
+=======
+#### 4.1.3 应用程序工程流
+
+### 4.2 使用cookie和URL参数
+
+
+### 4.3 在Session中存储数据
+
+>>>>>>> d191fb1358de5aa97bf6710ff1fa759d14117628
+### 4.4 使用Session
