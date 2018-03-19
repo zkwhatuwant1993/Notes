@@ -60,9 +60,6 @@
             - [4.2.3 Session中的漏洞](#423-session%E4%B8%AD%E7%9A%84%E6%BC%8F%E6%B4%9E)
         - [4.3 在Session中存储数据](#43-%E5%9C%A8session%E4%B8%AD%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE)
             - [4.3.1 在web.xml中配置Session](#431-%E5%9C%A8webxml%E4%B8%AD%E9%85%8D%E7%BD%AEsession)
-            - [4.1.3 应用程序工程流](#413-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%B7%A5%E7%A8%8B%E6%B5%81)
-        - [4.2 使用cookie和URL参数](#42-%E4%BD%BF%E7%94%A8cookie%E5%92%8Curl%E5%8F%82%E6%95%B0)
-        - [4.3 在Session中存储数据](#43-%E5%9C%A8session%E4%B8%AD%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE)
         - [4.4 使用Session](#44-%E4%BD%BF%E7%94%A8session)
 
 勘误表：http:www.wrox.com/go/projavaforwebapps
@@ -545,11 +542,5 @@ cookie和URL重写：将Session ID从服务器返回给用户浏览器，并在�
 ```
 
 注：也可以代码中配置。
-
-#### 4.1.3 应用程序工程流
-
-### 4.2 使用cookie和URL参数
-
-### 4.3 在Session中存储数据
 
 ### 4.4 使用Session
