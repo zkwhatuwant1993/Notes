@@ -55,13 +55,21 @@
             - [4.1.1 维持状态](#411-%E7%BB%B4%E6%8C%81%E7%8A%B6%E6%80%81)
             - [4.1.2 记住用户](#412-%E8%AE%B0%E4%BD%8F%E7%94%A8%E6%88%B7)
             - [4.1.3 应用程序工作流](#413-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E5%B7%A5%E4%BD%9C%E6%B5%81)
-        - [4.2 使用cookie和URL参数](#42-%E4%BD%BF%E7%94%A8cookie%E5%92%8Curl%E5%8F%82%E6%95%B0)
-            - [4.2.1 了解cookie](#421-%E4%BA%86%E8%A7%A3cookie)
+        - [4.2 使用cookie和URL参数和服务器传递Session ID](#42-%E4%BD%BF%E7%94%A8cookie%E5%92%8Curl%E5%8F%82%E6%95%B0%E5%92%8C%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%BC%A0%E9%80%92session-id)
+            - [4.2.1 Cookie技术](#421-cookie%E6%8A%80%E6%9C%AF)
             - [4.2.2 URL中的Session ID](#422-url%E4%B8%AD%E7%9A%84session-id)
             - [4.2.3 Session中的漏洞](#423-session%E4%B8%AD%E7%9A%84%E6%BC%8F%E6%B4%9E)
         - [4.3 在Session中存储数据](#43-%E5%9C%A8session%E4%B8%AD%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE)
             - [4.3.1 在web.xml中配置Session](#431-%E5%9C%A8webxml%E4%B8%AD%E9%85%8D%E7%BD%AEsession)
-        - [4.4 使用Session](#44-%E4%BD%BF%E7%94%A8session)
+            - [4.3.2 存储和获取数据](#432-%E5%AD%98%E5%82%A8%E5%92%8C%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE)
+            - [4.3.3 删除数据](#433-%E5%88%A0%E9%99%A4%E6%95%B0%E6%8D%AE)
+            - [4.3.4 相关方法](#434-%E7%9B%B8%E5%85%B3%E6%96%B9%E6%B3%95)
+        - [4.4 会话事件与监听器](#44-%E4%BC%9A%E8%AF%9D%E4%BA%8B%E4%BB%B6%E4%B8%8E%E7%9B%91%E5%90%AC%E5%99%A8)
+            - [4.4.1 注册监听器](#441-%E6%B3%A8%E5%86%8C%E7%9B%91%E5%90%AC%E5%99%A8)
+            - [4.4.2 维护活跃会话列表：使用JAVA容器维护会话](#442-%E7%BB%B4%E6%8A%A4%E6%B4%BB%E8%B7%83%E4%BC%9A%E8%AF%9D%E5%88%97%E8%A1%A8%EF%BC%9A%E4%BD%BF%E7%94%A8java%E5%AE%B9%E5%99%A8%E7%BB%B4%E6%8A%A4%E4%BC%9A%E8%AF%9D)
+        - [4.5 将使用Sesssion的应用程序集群化](#45-%E5%B0%86%E4%BD%BF%E7%94%A8sesssion%E7%9A%84%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E9%9B%86%E7%BE%A4%E5%8C%96)
+            - [4.5.1 在集群中使用Session ID](#451-%E5%9C%A8%E9%9B%86%E7%BE%A4%E4%B8%AD%E4%BD%BF%E7%94%A8session-id)
+            - [4.5.2 了解会话复制和故障恢复](#452-%E4%BA%86%E8%A7%A3%E4%BC%9A%E8%AF%9D%E5%A4%8D%E5%88%B6%E5%92%8C%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D)
 
 勘误表：http:www.wrox.com/go/projavaforwebapps
 
@@ -495,19 +503,19 @@ JSP规范要求JSP的转换器和编译器提供这些变量，并且名字也�
 
 #### 4.1.3 应用程序工作流
 
-### 4.2 使用cookie和URL参数
+### 4.2 使用cookie和URL参数和服务器传递Session ID
 
 web会话的基本理论和JavaEE Web应用程序中会话实现规范
 
 web会话的基本理论:会话是由服务器或Web应用程序管理的某些数据（文件、内存片段对象或者容器），它包含了分配给他的各种不同数据。用户浏览器中不用保持或维持任何此类数据。
 
-Session ID:关联用户浏览器和容器，随机生成的字符串(随机：防止会话劫持)。
+**Session ID**:关联用户浏览器和容器，随机生成的字符串(随机：防止会话劫持)。
 
 **http会话流程**：略。
 
-cookie和URL重写：将Session ID从服务器返回给用户浏览器，并在该浏览器之后的请求中包含此ID。
+#### 4.2.1 Cookie技术
 
-#### 4.2.1 了解cookie
+Http Cookie技术：将Session ID从服务器返回给用户浏览器，并在该浏览器之后的请求中包含此ID。cookie是一种必须的通信机制，可以通过Set-Cookie响应头在服务器和浏览器之间传递任意数据，并存储在用户计算机中，然后再通过请求头Cookie从浏览器返回到服务器中。
 
 #### 4.2.2 URL中的Session ID
 
@@ -557,4 +565,49 @@ cookie和URL重写：将Session ID从服务器返回给用户浏览器，并在�
 
 注：也可以代码中配置。
 
-### 4.4 使用Session
+#### 4.3.2 存储和获取数据
+
+#### 4.3.3 删除数据
+
+使用removeAttribute()方法或将存储在Session中的对应数据置为空(空串，空容器等)。
+
+#### 4.3.4 相关方法
+
+- getCreationTime()
+- getLastAccessedTime()
+- isNew()
+- getMaxInactiveInterval/setMaxInactiveInterval
+- invalidate()注销会话
+
+### 4.4 会话事件与监听器
+
+会话事件：JavaEE中会话最重要的特性之一就是会话事件。当会话发生变化时（如：添加或移除属性），Web容器将这些变化通知应用程序。该功能通过**发布/订阅模式**实现，从而可以将修改会话和监听会话的代码解耦合。
+
+监听器：用于监听会话事件。
+tips:如果使用了一些第三方代码：如Spring Framework或Spring Security--对会话进行修改时，该功能非常有用，因为你可以在代码中检测到这些变化并且不需要修改第三方代码。
+
+#### 4.4.1 注册监听器
+
+1. web.xml中使用\<listener\>进行配置
+2. 使用WebListener注解。
+3. 从Servlet3.0/JavaEE开始，还可以在代码中使用ServletConfig中的addListener()方法。不过该方法只能在ServletContextListenr和contextInitialized方法或者ServletContainerInitializer中的onStartup方法中调用。
+
+#### 4.4.2 维护活跃会话列表：使用JAVA容器维护会话
+
+功能：当有一个会话被创建，将该会话添加到维护列表中；当一个会话被销毁时，从维护列表中移除；当一个会话被更新(changeSessionId)...,类似于anroid中维护Activity列表.
+
+### 4.5 将使用Sesssion的应用程序集群化
+
+群集实例间的通信（消息队列）：AMQP,JMS,MSMQ。
+
+#### 4.5.1 在集群中使用Session ID
+
+沾滞会话:使负载均衡机制能够感知到会话，并且总是将来自于同一会话的请求发送到相同的服务器。（支持扩展性，不支持高可用性，如果创建该会话的web服务器终止，该会话将丢失）
+
+#### 4.5.2 了解会话复制和故障恢复
+
+会话复制：如果创建某个会话的服务器终止了，那么该会话将丢失。使用会话复制技术，可以将会话在整个集群中复制，无论他产生于哪个实例，它对所有web容器都是可用的。
+
+在web.xml中使用\<distribuable/ \>代表了会话将在整个集群中复制。当某个实例创建了会话，它将被复制到其他实例中。如果会话的属性发生了变化，改变后的会话也会被重新复制到其他实例中，使所有实例保持最新的会话状态。
+
+tips：这两种技术并不互斥，结合两者来实现**故障恢复：会话仍然被复制，但同一会话的请求也将被发送到同一服务器，如果该服务器终止，此时请求将被发送到另一个得知此会话的实例。**要满足实际需求需要多种技术结合。
