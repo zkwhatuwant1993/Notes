@@ -902,7 +902,7 @@ JDK8 的Stream 是一个受到**函数式编程**和**多核时代**影响而产
 
 ## 六、使用JSTL（Java标准标签库）
 
-### JSP标签和JSTL
+### 6.1 JSP标签和JSTL
 
 使用jsp指令taglib引入的标签库中的URI并不是实际的TLD文件的位置(并不是一个真正的URI)，该URI只是一种用于识别唯一TLD的技术，通过这种方式可以正确地关联到相应的TLD文件。
 
@@ -914,3 +914,88 @@ JDK8 的Stream 是一个受到**函数式编程**和**多核时代**影响而产
 2. 部署描述符文件(web.xml)中\<jsp-config>中的显式\<taglib>声明。
 3. /WEB-INF目录或所有子目录中的TLD文件，或者/WEB-INF/lib所有JAR文件的MATA-INF目录中的所有TLD文件。
 4. 最后，解析器将检查web容器或者应用服务器中的所有TLD文件(到这步一般这个web容器不与Java EE规范兼容，)
+
+JSTL中的5个标签库:
+
+- core
+- formmat
+- function
+- sql
+- xml
+
+### 6.2 使用core标签库
+
+#### 6.2.1 <c:out>
+
+```xml
+<c:out value="${el}" defalut="${el}">
+<!-- 该标签实际赞同于${fn:escapeXml(variable)} ,默认会对xml保留字符进行转义-->
+<c:out value="${el}" defalut="${el}" escapeXml=true>
+```
+
+#### 6.2.2 <c:url>
+
+标签<c:url>最大的作用是正确的**对URL进行编码**，并通过JSP输出到Response中
+
+```xml
+
+<!-- 当JSP引擎渲染JSP时，会解析<c:url>标签并替换它，它将把所有不是JSP特有语法的问法当作普通文本 -->
+<a href="<c:url value='https://www.baidu.com'>"/>超链接</a>
+
+<!-- 绝对URL -->
+<c:url value=“https://www.baidu.com”>
+    <c:param name="paramName" value="paramValue" />
+</c:url>
+
+<!-- 相对URL，此时该标签生成的URL的父path为application部署的context -->
+<c:url value=“/view.jsp”>
+    <c:param name="paramName" value="paramValue" />
+</c:url>
+
+<!-- 相对URL，也可以通过属性指定context -->
+<c:url value=“/view.jsp” context="/">
+    <c:param name="paramName" value="paramValue" />
+</c:url>
+
+<!-- 如果某个URL**需要使用多次**，可以将该URL保存到scope中(默认为page scope) -->
+<c:url value=“/view.jsp” var="urlName" scope="request">
+    <c:param name="paramName" value="paramValue" />
+</c:url>
+```
+
+#### 6.2.3 <c:if>
+
+单条件标签，用于控制是否渲染指定内容。
+
+#### 6.2.4 <c:choose>
+
+多条件标签，用于控制是否渲染指定内容。
+
+#### 6.2.5 <c:forEach>
+
+varStatus属性
+
+- begin
+- end
+- step
+- index
+- count
+- current
+- first
+- last
+
+#### 6.2.6 <c:forTokens>
+
+#### 6.2.7 <c:redirect>
+
+重定向：在响应头中添加HTTP Location Header并修改响应状态码，它将终止JSP的执行。
+
+#### 6.2.8 <c:import>获取特定URL资源的内容。
+
+#### 6.2.9 <c:set>和<c:remove>
+
+### 6.3 使用国际化(i18n)和格式化标签库(FMT命令空间)
+
+国际化和本地化(l10n):首先通过架构进行国际化，然后通过转换进行本地化。
+
+### 6.3.1 国际化和本地化组件
