@@ -1,4 +1,4 @@
-# Java Web高级编程学习笔记
+# Java Web高级编程学习笔记：阅读API和JSR等Java EE文档
 
 - [Java Web高级编程学习笔记](#java-web%E9%AB%98%E7%BA%A7%E7%BC%96%E7%A8%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0)
     - [一、Java EE相关概念](#%E4%B8%80%E3%80%81java-ee%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5)
@@ -85,6 +85,11 @@
             - [5.2.7 枚举](#527-%E6%9E%9A%E4%B8%BE)
             - [5.2.8 lambda表达式：匿名函数](#528-lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%EF%BC%9A%E5%8C%BF%E5%90%8D%E5%87%BD%E6%95%B0)
             - [5.2.9 在EL中访问集合：获取集合中的元素](#529-%E5%9C%A8el%E4%B8%AD%E8%AE%BF%E9%97%AE%E9%9B%86%E5%90%88%EF%BC%9A%E8%8E%B7%E5%8F%96%E9%9B%86%E5%90%88%E4%B8%AD%E7%9A%84%E5%85%83%E7%B4%A0)
+        - [5.3 在EL中使用域变量](#53-%E5%9C%A8el%E4%B8%AD%E4%BD%BF%E7%94%A8%E5%9F%9F%E5%8F%98%E9%87%8F)
+            - [5.3.1 在EL中使用隐式域(scope)](#531-%E5%9C%A8el%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%9A%90%E5%BC%8F%E5%9F%9Fscope)
+            - [5.3.2 使用隐式的EL变量(内置变量)](#532-%E4%BD%BF%E7%94%A8%E9%9A%90%E5%BC%8F%E7%9A%84el%E5%8F%98%E9%87%8F%E5%86%85%E7%BD%AE%E5%8F%98%E9%87%8F)
+        - [5.4 使用流API访问集合：集合流API](#54-%E4%BD%BF%E7%94%A8%E6%B5%81api%E8%AE%BF%E9%97%AE%E9%9B%86%E5%90%88%EF%BC%9A%E9%9B%86%E5%90%88%E6%B5%81api)
+            - [5.4.1 了解中间操作](#541-%E4%BA%86%E8%A7%A3%E4%B8%AD%E9%97%B4%E6%93%8D%E4%BD%9C)
 
 勘误表：http:www.wrox.com/go/projavaforwebapps
 
@@ -740,7 +745,7 @@ JUEL可以使用通过使用特定的语法指定字面量。如true,false,null�
 
 #### 5.2.5 EL函数
 
-EL函数的标准定义在TLD（标签库描述符）中
+EL函数的标准定义在TLD（标签库描述符,是一个文件）中
 在EL中,函数是映射到类中**静态方法**的一个特殊工具。如xml标签一样，函数会被映射到命名空间。
 
 ```js
@@ -820,3 +825,92 @@ ${list[index]}
 //方式二：该index值必须能够转换为整数。而且和map使用方式不太容易区别开
 ${list["index"]}
 ```
+
+### 5.3 在EL中使用域变量
+
+- page域
+- request域
+- session域
+- application域
+
+#### 5.3.1 在EL中使用隐式域(scope)
+
+EL中定义了11个隐式域变量，当一个EL表达式引用了一个变量时，EL求值程序将按照下面的流程解析变量：
+
+1. 检查该变量是否是隐式域变量
+2. 如果不在11个隐式变量之中，EL求值程序将在page scope当中寻找该属性(PageContext.getAttribute("varName")),检查其中是否包含了同名变量(大小写敏感)，如果找到，则使用该属性值作为变量的值。
+3. 如果在page scope中未找到,在request域里查找...
+4. 在session scope里查找...
+5. 在application scope里查找...
+6. 都没找到，报错
+
+所以4个scope的优先级是：page > request > session >application.
+
+```xml
+<!-- 下面的JSP注释告诉IDE本页面中使用了一个在隐式scope中的user变量,他的类型是com.zk.User。-->
+<!-- 这可以使IDE能在编译前识别该类型，它就能正常提供自动完成、智能建议，检查EL表达式是否正确等功能 -->
+<%--@elvariable id="user" type="com.zk.User"--%>
+```
+
+#### 5.3.2 使用隐式的EL变量(内置变量)
+
+- pageContext是PageContext类的一个实例
+- pageScope是一个Map<String,Object>,他包含了所有绑定到PageContext的属性。
+- requestScope是一个Map<String,Object>,他包含了所有绑定到ServletRequest的属性.
+- sessionScope是一个Map<String,Object>,他包含了所有绑定到当前会话的属性。
+- applicationScope是一个Map<String,Object>，他包含了所有绑定到ServletContext的属性
+- param和paramValues：提供对请求参数的访问。
+- header和headerValues提供对请求头的访问。
+- initParam，它包含了该applicaiton中的ServlectContext实例的所有上下文初始化参数。
+- cookie，他包含了用户浏览器发送的请求中的所有cookie.
+
+### 5.4 使用流API访问集合：集合流API
+
+Jave EE7的EL3.0新增的重大特性之一是：支持Java SE8引入的**集合流API**。因为EL3.0将以原生的方式支持该API,所以如果希望使用该EL特性，并不需要在Java 8中运行应用程序。
+
+流API的基础是所有collection中存在的无参stream方法。该方法将返回java.util.stream.Stream类的一个实例，通过该对象可以操作集合的**副本**(如过滤和排序等)。
+
+JDK8 的Stream 是一个受到**函数式编程**和**多核时代**影响而产生的东西。很多时候我们需要到底层返回数据，上层再对数据进行遍历，进行一些数据统计，但是之前的Java API 中很少有这种方法，这就需要我们自己来 Iterator 来遍历，如果JDK 能够为我们提供一些这种方法，并且能够为我们优化就好了。
+
+所以JDK8加入 了 java.util.stream包，实现了集合的流式操作，流式操作包括集合的**过滤，排序，映射**等功能。根据流的操作性，又可以分为 **串行流** 和 **并行流**。根据操作返回的结果不同，流式操作又分为**中间操作**和**最终操作**。大大方便了我们对于集合的操作。
+
+- 串行流:操作在一个线程中依次完成。
+- 并行流在多个线程中完成。
+- 最终操作：返回一特定类型的结果。
+- 中间操作：返回流本身。
+
+链式管道:管道源(源Stream) ->中间操作(如过滤和排序)->最终结果(如结果stream转换成可遍历和显示的List)
+
+#### 5.4.1 了解中间操作
+
+中间操作都是基于Stream执行的，并不会修改原始集合，这些操作只会影响流中副本的内容。
+
+1. 过滤元素filter()和distinct()
+2. 对元素进行排序sort()
+3. 限制流中元素的大小limit()和subStream()
+4. 元素映射map()
+
+#### 5.4.2 使用终结操作
+
+1. forEach()遍历元素
+2. 聚合函数
+3. toArray(),toList()
+4. reduce()
+5. collection()
+
+总结：尽管EL表达式可以替换许多JAVA代码，但它们无法替换JSP中所有的JAVA代码。如：不能在循环中使用EL，或者根据某些表达式是否为真执行指定代码(分支)。为此我们需要JSTL.
+
+## 六、使用JSTL（Java标准标签库）
+
+### JSP标签和JSTL
+
+使用jsp指令taglib引入的标签库中的URI并不是实际的TLD文件的位置(并不是一个真正的URI)，该URI只是一种用于识别唯一TLD的技术，通过这种方式可以正确地关联到相应的TLD文件。
+
+使用该了该指令将阻止XML文档解析器解析JSP，相反WEB容器中的JSP解析器可以识别。
+
+当JSP解析器遇到taglib指令时，它会根据URI在**JSP规范中定义的不同位置中**定位相应的TLD文件。JSP规范定义的这些位置如下(搜索范围优先级从上到下)：
+
+1. 如果使用的容器是一个兼容Java EE的容器，那么解析器将搜索所有匹配Java EE规范的TLD文件，包括JSP标签库，JSTL和所有JavaServer Faces库。
+2. 部署描述符文件(web.xml)中\<jsp-config>中的显式\<taglib>声明。
+3. /WEB-INF目录或所有子目录中的TLD文件，或者/WEB-INF/lib所有JAR文件的MATA-INF目录中的所有TLD文件。
+4. 最后，解析器将检查web容器或者应用服务器中的所有TLD文件(到这步一般这个web容器不与Java EE规范兼容，)
