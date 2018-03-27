@@ -918,7 +918,7 @@ JDK8 的Stream 是一个受到**函数式编程**和**多核时代**影响而产
 JSTL中的5个标签库:
 
 - core
-- formmat
+- format
 - function
 - sql
 - xml
@@ -939,25 +939,25 @@ JSTL中的5个标签库:
 
 ```xml
 
-<!-- 当JSP引擎渲染JSP时，会解析<c:url>标签并替换它，它将把所有不是JSP特有语法的问法当作普通文本 -->
+<!-- 当JSP引擎渲染JSP时，会解析<c:url>标签并替换它，它将把所有不是JSP特有语法的问法当作普通文本 -->
 <a href="<c:url value='https://www.baidu.com'>"/>超链接</a>
 
-<!-- 绝对URL -->
+<!-- 绝对URL -->
 <c:url value=“https://www.baidu.com”>
     <c:param name="paramName" value="paramValue" />
 </c:url>
 
-<!-- 相对URL，此时该标签生成的URL的父path为application部署的context -->
+<!-- 相对URL，此时该标签生成的URL的父path为application部署的context -->
 <c:url value=“/view.jsp”>
     <c:param name="paramName" value="paramValue" />
 </c:url>
 
-<!-- 相对URL，也可以通过属性指定context -->
+<!-- 相对URL，也可以通过属性指定context -->
 <c:url value=“/view.jsp” context="/">
     <c:param name="paramName" value="paramValue" />
 </c:url>
 
-<!-- 如果某个URL**需要使用多次**，可以将该URL保存到scope中(默认为page scope) -->
+<!-- 如果某个URL**需要使用多次**，可以将该URL保存到scope中(默认为page scope) -->
 <c:url value=“/view.jsp” var="urlName" scope="request">
     <c:param name="paramName" value="paramValue" />
 </c:url>
@@ -965,15 +965,15 @@ JSTL中的5个标签库:
 
 #### 6.2.3 <c:if>
 
-单条件标签，用于控制是否渲染指定内容。
+单条件标签，用于控制是否渲染指定内容。
 
 #### 6.2.4 <c:choose>
 
-多条件标签，用于控制是否渲染指定内容。
+多条件标签，用于控制是否渲染指定内容。
 
 #### 6.2.5 <c:forEach>
 
-varStatus属性
+varStatus属性
 
 - begin
 - end
@@ -988,7 +988,7 @@ JSTL中的5个标签库:
 
 #### 6.2.7 <c:redirect>
 
-重定向：在响应头中添加HTTP Location Header并修改响应状态码，它将终止JSP的执行。
+重定向：在响应头中添加HTTP Location Header并修改响应状态码，它将终止JSP的执行。
 
 #### 6.2.8 <c:import>获取特定URL资源的内容。
 
@@ -996,6 +996,73 @@ JSTL中的5个标签库:
 
 ### 6.3 使用国际化(i18n)和格式化标签库(FMT命令空间)
 
-国际化和本地化(l10n):首先通过架构进行国际化，然后通过转换进行本地化。
+国际化和本地化(l10n):首先通过架构进行国际化，然后通过转换进行本地化。
 
-### 6.3.1 国际化和本地化组件
+#### 6.3.1 国际化和本地化组件
+
+国际化和本地化工作由三个部分组成：
+
+- 文本转换:使用其他语言的用户能够使用该应用程序
+- 特殊字符格式化：根据不同的语言环境将日期、时间、数字(包括货币和百分比)进行正确格式化。
+- 价格本地化（除需求指定实现，一般显示为一种国际性货币，如美元）：将价格以用户本地货币显示。
+
+区域设置：语言代码_国家代码（如en_US）。（参考ISO标签和JDK API java.util.Local）
+
+国际化和本地化标签分为两大类：
+
+- i18n标签
+- 日期、时间、数字格式化标签  （JDK 相关API）
+
+i18n标签的**资源包**：它定义了特定区域设置的对象。资源包由对应着包中条目的键组成，将开发都选择的区域代码添加到任意的基本名称上即可组成完整的资源包名称。特定的键通常在所有的资源包都有条目存在，每种支持的语言和国家各有一条。
+
+#### 6.3.2 <fmt:message>
+
+该标签将在资源包中定位到某个本地化消息，然后将它内嵌在页面的消息中或者保存到EL变量中。
+
+本地化消息文件中的占位符："{index}",index从0开始。如果消息中包含了占位符但未使用<fmt:param>替换对应的值，那么该占位符将保持原样显示。
+
+```xml
+<fmt:message key="keyOfMessage">
+    <fmt:param value="${el}"> <!-- 替换index为0的占位符-->
+    <fmt:param value="${el}"> <!-- 替换index为1的占位符-->
+</fmt:message>
+```
+
+#### 7.3.3 <fmt:setLocale>：java.util.Locale
+
+该标签将设置i18n解析资源包时使用的区域设置并进行格式化。
+
+JSTL中的i18n标签依赖于本地化上下文告诉它们当前的资源包和区域设置。可使用<fmt:setLocale>和其他技术指定当前本地化上下文区域设置。
+
+#### 7.3.4 <fmt:bundle>和<fmt:setBundel>:java.util.ResourceBundle
+
+<fmt:bundle>指定上下文，<fmt:setBundel>保存为EL变量
+
+<fmt:setLocale>和<fmt:setBundle>是指定使用资源包两种方式。当i18n标签需要本地化上下文时，搜索过程如下：
+
+1. 如果在<fmt:message>中指定了bundle属性，那么使用该值.
+2. 如果i18n标签被内嵌在<fmt:bundle>中，那么它将使用该资源包。
+3. 上下文初始化参数或者EL变量javax.servlet.jsp.jstl.fmt.localizationContent指定的默认上下文。
+
+```xml
+<!-- setBundle 标签如果不指定var属性，那么该标签生成的EL变量将保存在名为javax.servlet.jsp.jstl.fmt.localizationContent的变量中-->
+<!-- basename表示资源包名称-->
+<fmt:setBundle basename="name1" var="bundleName" />
+<fmt:bundle basename="name2">
+    <fmt:message key="messageKey1" />
+    <fmt:message key="messageKey2" bundle="${bundleName}" />
+</fmt:bundle>
+```
+
+#### 6.3.5 <fmt:timeZone>和<fmt:setTimeZone>
+
+时区设置优先级：
+
+1. 格式化标签中指定的timeZone属性
+2. <fmt:timeZone>标签
+3. 上下文初始化参数或者javax.servlet.jsp.jstl.fmt.timeZone的el变量
+4. 容器提供的时区。
+
+#### 6.3.6 <fmt:formatDate>和<fmt:parseDate>
+
+#### 6.3.7 <fmt:formartNumber>和<fmt:parseNumber>
