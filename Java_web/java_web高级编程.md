@@ -1066,3 +1066,82 @@ JSTL中的i18n标签依赖于本地化上下文告诉它们当前的资源包和
 #### 6.3.6 <fmt:formatDate>和<fmt:parseDate>
 
 #### 6.3.7 <fmt:formartNumber>和<fmt:parseNumber>
+
+## 七、 自定义标签和函数库
+
+### 7.1 了解TLD、标签文件和标签处理器
+
+**标签处理器**：所有JSP标签都将引起某些标签处理器的执行。标签处理器是javax.servlet.jsp.tagext.Tag或者javax.servlet.jsp.tagext.SimpleTag的实现类，其中包含了用于完成标签目的的必要代码。
+标签处理器在TLD的标签定义中指定，容器使用该信息将JSP中的标签映射到对应的Java代码。
+
+**标签文件**：**标签**不一这定要被显示地编写为Java代码，正如容器可以将JSP文件转换和编译成HttpServlet一样，它也可以将标签文件转换和编译成SimpleTag。标签文件不如直接的Java代码强大，并且它无法像显示的标签处理器一样解析标签中的**嵌套标签**，但是标签文件可以使用JSP这样的简单标签并支持在其中使用其他JSP标签。**TLD中的标签定义可以指向一个标签处理器或者标签文件**。
+
+```xml
+<!-- tagdir目录下的所有.tag和.tagx文件都会被绑定到myTags命名空间 -->
+<!-- Application中的文件必须被添加到/WEB-INF/tags目录下或其子目录下-->
+<%@ taglib prefix="myTags" tagdir="/WEB-INF/tag"%>
+```
+
+tip:JSP标签文件还可以包含在JAR文件中，但必须放到/META-INF/tag目录
+
+### 7.1.1 读取Java标签库TLD(c.tld)
+
+在org.glassfish.web:javax.servlet.jsp.jstl Maven artfcat JAR文件的/MEATA-INF/tag目录下可以找到该文件。
+
+```xml
+<!-- 文档根元素，声明了将使用XML schema定义文件的位置（xxx.xsd）,该文件描述xml文件的结构(也就是tld文件)-->
+<taglib xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
+    version="2.1">
+    <!-- xsd文件严格了元素顺序，如元素顺序有误，则该TLD文件无效-->
+    <!--前5个元素声明了关于标签库的通用信息-->
+    <description>JSTL 1.2 core library</description>
+    <display-name>JSTL core</display-name>
+    <tlib-version>1.2</tlib-version>
+    <short-name>c</short-name>
+    <uri>http://java.sun.com/jsp/jstl/core</uri>
+```
+
+1. 定义验证器和监听器
+
+    ```xml
+    <validator>
+        <description>
+            Provides core validation features for JSTL tags.
+        </description>
+        <validator-class>
+            org.apache.taglibs.standard.tlv.JstlCoreTLV
+        </validator-class>
+    </validator>
+    ```
+
+    验证器的实现是比较复杂的，因为它要求实际的去解析JSP语法，通常情况下我们不要使用它。
+
+2. 定义标签:tag标签
+
+    ```xml
+    <tag>
+        <description>
+        Simple conditional tag, which evalutes its body if the
+        supplied condition is true and optionally exposes a Boolean
+        scripting variable representing the evaluation of this condition
+        </description>
+        <name>if</name>
+        <!-- 声明负责执行标签的标签处理器类(Tag或SimpleTag) -->
+        <tag-class>org.apache.taglibs.standard.tag.rt.core.IfTag</tag-class>
+        <!-- 指定允许嵌套内容类型，JSP表示该标签的嵌套内容可以是任何JSP内容，但不包括声明-->
+        <body-content>JSP</body-content>
+        <attribute>
+            <description>
+    The test condition that determines whether or
+    not the body content should be processed.
+            </description>
+            <name>test</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+        <type>boolean</type>
+        </attribute>
+        <attribute>...</attribute>
+    </tag>
+    ```
