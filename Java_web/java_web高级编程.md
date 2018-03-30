@@ -1071,18 +1071,27 @@ JSTL中的i18n标签依赖于本地化上下文告诉它们当前的资源包和
 
 ### 7.1 了解TLD、标签文件和标签处理器
 
+两种定义方式方式：
+
+1. TLD文件：标签库描述文件，是一个XML文件，可以包含多个标签定义。
+2. tag/tagx文件:是一个JSP文件。一个文件代表一个标签。
+
 **标签处理器**：所有JSP标签都将引起某些标签处理器的执行。标签处理器是javax.servlet.jsp.tagext.Tag或者javax.servlet.jsp.tagext.SimpleTag的实现类，其中包含了用于完成标签目的的必要代码。
 标签处理器在TLD的标签定义中指定，容器使用该信息将JSP中的标签映射到对应的Java代码。
 
-**标签文件**：**标签**不一这定要被显示地编写为Java代码，正如容器可以将JSP文件转换和编译成HttpServlet一样，它也可以将标签文件转换和编译成SimpleTag。标签文件不如直接的Java代码强大，并且它无法像显示的标签处理器一样解析标签中的**嵌套标签**，但是标签文件可以使用JSP这样的简单标签并支持在其中使用其他JSP标签。**TLD中的标签定义可以指向一个标签处理器或者标签文件**。
+**标签文件**：**标签**不一这定要被显示地编写为Java代码，正如容器可以将JSP文件转换和编译成HttpServlet一样，它也可以将**标签文件**转换和编译成SimpleTag。标签文件不如直接的Java代码强大，并且它无法像显示的标签处理器一样解析标签中的**嵌套标签**，但是标签文件可以使用JSP这样的简单标签并支持在其中使用其他JSP标签。**TLD中的标签定义可以指向一个标签处理器或者标签文件**。
 
 ```xml
 <!-- tagdir目录下的所有.tag和.tagx文件都会被绑定到myTags命名空间 -->
 <!-- Application中的文件必须被添加到/WEB-INF/tags目录下或其子目录下-->
 <%@ taglib prefix="myTags" tagdir="/WEB-INF/tag"%>
+
+<!-- 使用标签 -->
+<!-- 其中myTags代表taglib中属性tagdir目录 标签main是tag目录下的一个.tag文件的文件名,即main.tag-->
+<myTags:main ...>
 ```
 
-tip:JSP标签文件还可以包含在JAR文件中，但必须放到/META-INF/tag目录
+tip:JSP标签文件在应用程序(项目)文件中必须放到/WEB-INF/tags目录下，并且可以在TLD中声明。如果标签文件被添加到JAR中，必须放到/META-INF/tag目录下且必须在该JAR的/META-INF/目录中的tld声明。
 
 ### 7.1.1 读取Java标签库TLD(c.tld)
 
