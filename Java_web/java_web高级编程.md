@@ -127,6 +127,8 @@
             - [8.2.4 使用注解配置：@WebFilter](#824-%E4%BD%BF%E7%94%A8%E6%B3%A8%E8%A7%A3%E9%85%8D%E7%BD%AE%EF%BC%9Awebfilter)
             - [8.2.4 编程方式配置](#824-%E7%BC%96%E7%A8%8B%E6%96%B9%E5%BC%8F%E9%85%8D%E7%BD%AE)
         - [8.3 Filter生命周期](#83-filter%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F)
+        - [8.4 过滤器排序](#84-%E8%BF%87%E6%BB%A4%E5%99%A8%E6%8E%92%E5%BA%8F)
+            - [8.4.1](#841)
 
 勘误表：http:www.wrox.com/go/projavaforwebapps
 
@@ -1276,6 +1278,8 @@ Filter调用FilterChian.doFilter()将在过滤器链中调用下一个Filter。�
 
 #### 8.2.4 使用注解配置：@WebFilter
 
+使用注解的缺点：不能对过滤器链上的过滤器进行排序。
+
 #### 8.2.4 编程方式配置
 
 如同Servlet、监听器和其他组件一样，可以在ServletContext中配置过滤器。因为这必须要在ServletContext启动之前完成(意思是在初始化中注册)，所以需要在ServletContextListener的contextInitialized方法中实现，也可以在ServletContainerInitializer的onStartup方法中添加过滤器。
@@ -1283,3 +1287,14 @@ Filter调用FilterChian.doFilter()将在过滤器链中调用下一个Filter。�
 ### 8.3 Filter生命周期
 
 与Servlet不同的是，过滤器不可以在第一个请求到达时加载。过滤器的init方法总是在应用程序启动时调用：在ServletContextListerner初始化之后，Servlet初始化之前，按照xxx顺序依次加载。
+
+### 8.4 过滤器排序
+
+过滤器的顺序决定了它们在过滤器链中出现的位置。
+
+默认的过滤器顺序：
+
+1. 匹配请求的过滤器将按照它们出现在部署描述符或者编程式配置中的顺序添加到过滤器链中(如果同时在部署描述符或者编程式配置中设置了过滤器，如果需要代码配置中的过滤器出现在XML配置的过滤器之前，那么需要在代码配置中使用addMapping方法的第2个参数)
+2. URL映射的过滤器优先级比Servlet名称映射的过滤器优先级高。这意味着如果这两种类型的过滤器同时匹配某个请求，URL映射过滤器在过滤器链中出现的位置将总是在Servlet名称过滤器之前(即URL映射过滤器先执行。即使url映射的过滤器在Servlet名称过滤器之后声明)。
+
+#### 8.4.1
