@@ -111,13 +111,13 @@
             - [6.3.5 <fmt:timeZone>和<fmt:setTimeZone>](#635-fmt-timezonefmt-settimezone)
             - [6.3.6 <fmt:formatDate>和<fmt:parseDate>](#636-fmt-formatdatefmt-parsedate)
             - [6.3.7 <fmt:formartNumber>和<fmt:parseNumber>](#637-fmt-formartnumberfmt-parsenumber)
-    - [七、 自定义标签和函数库](#)
+    - [七、自定义标签和函数库](#)
         - [7.1 了解TLD、标签文件和标签处理器](#71-tld)
         - [7.1.1 读取Java标签库TLD(c.tld)](#711-javatldctld)
             - [7.1.2 标签文件指令](#712)
         - [7.2 将标签文件用作HTML模板](#72-html)
         - [7.3 标签处理器](#73)
-    - [八、 过滤器](#)
+    - [八、过滤器](#)
         - [8.1 使用过滤器的目的](#81)
         - [8.2 创建、配置和映射过滤器：类似Servlet](#82-servlet)
             - [8.2.1 过滤器链](#821)
@@ -1106,7 +1106,7 @@ JSTL中的i18n标签依赖于本地化上下文告诉它们当前的资源包和
 
 #### 6.3.7 <fmt:formartNumber>和<fmt:parseNumber>
 
-## 七、 自定义标签和函数库
+## 七、自定义标签和函数库
 
 ### 7.1 了解TLD、标签文件和标签处理器
 
@@ -1213,7 +1213,7 @@ tip:JSP标签文件在应用程序(项目)文件中必须放到/WEB-INF/tags目�
 
 重要：**了解标签处理器的不同类型**
 
-## 八、 过滤器
+## 八、过滤器
 
 ### 8.1 使用过滤器的目的
 
@@ -1290,7 +1290,7 @@ Filter调用FilterChian.doFilter()将在过滤器链中调用下一个Filter。�
 
 ### 8.3 Filter生命周期
 
-与Servlet不同的是，过滤器不可以在第一个请求到达时加载。过滤器的init方法总是在应用程序启动时调用：在ServletContextListerner初始化之后，Servlet初始化之前，按照xxx顺序依次加载。
+与Servlet不同的是，过滤器不可以在第一个请求到达时加载。过滤器的init方法总是在应用程序启动时调用：在ServletContextListerner初始化之后，Servlet初始化之前，按照它们在部署描述符中声明的顺序依次加载。
 
 ### 8.4 过滤器排序
 
