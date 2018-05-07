@@ -86,3 +86,61 @@ undefined 值是派生自null, undefined == null 结果为true
 - parseFloat()
 
 #### String类型
+
+ECMAScript 中的字符串是不可变的
+
+将其他类型的值转换为String使用toString()方法
+
+#### Object类型：ECMAScript 中的对象其实就是一组数据（属性）和功能（函数）的集合
+
+理解一个重要的思想:即在 ECMAScript 中， (就像 Java 中的 java.lang.Object 对象一样)Object 类型是所有它的实例的基类。
+
+Object的每个实例都具有的属性和方法：
+
+- constructor:保存着用于创建当前对象的函数。
+- hasOwnProperty(propertyName):用于检查给定的属性在当前对象实例中(而不是在实例 的原型中)是否存在
+- isPrototypeOf(object):用于检查传入的对象是否是传入对象的原型
+- propertyIsEnumerable(propertyName)
+- toLocaleString()
+- toString()
+- valueOf
+
+### 2.2 操作符
+
+在所有运算中，如果对非数值型数据进行数值转换(有些运算会隐式的先转换，再计算)，调用其Number()方法；进行字符运算调用toString();执行条件语句时如果结果不为Boolean类型会将结果调用Boolean()方法进行转换
+
+#### 位操作符: NaN 和 Infinity 值应用位操作时，这两个值都会被当成 0 来处理
+
+#### 逻辑操作符
+
+1. !
+
+    注意：任何非0的数值的结果都为true,包括undefined,NaN
+
+2. &&
+
+    - 如果第一个操作数是对象，则返回第二个操作数
+    - 如果有一个操作数是null,返回null
+
+3. ||
+
+    - 如果第一个操作数是对象，则返回第一个操作数
+    - 如果两个操作数都是null，返回null，否则返回非null的那一个操作数。undefined和NaN同理
+
+### 数学运算
+
+### 关系运算
+
+### 相等运算
+
+#### 等于或不等于：强制类型转换
+
+#### 全等或不全等：不类型转换
+
+## 2.3 语句
+
+## 2.4 函数
+
+### for-in：遍历（枚举）对象属性
+
+如果表示要迭代的对象的变量值为 null 或 undefined，for-in 语句会抛出错误。 ECMAScript 5 更正了这一行为;对这种情况不再抛出错误，而只是不执行循环体。为了保证最大限度的兼容性，建议在使用 for-in 循环之前，先检测确认该对象的值不是 null 或 undefined。
