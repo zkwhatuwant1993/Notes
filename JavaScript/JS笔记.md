@@ -46,7 +46,7 @@ use strict;
 
 ## 二、 基本概念
 
-### 2.1 数据类型
+### 2.1 基本数据类型
 
 按照ECMA-262 的定义，JavaScript 的变量与其他语言的变量有很大区别。JavaScript 变量松散类型的本质，决定了它只是在特定时间用于保存特定值的一个名字而已。由于不存在定义某个变量必须要保存何种数据类型值的规则，变量的值及其数据类型可以在脚本的生命周期内改变。
 
@@ -356,7 +356,7 @@ join():数组继承的toLocaleString()、toString()和valueOf()方法，在默�
 - reverse()
 - sort()，此方法还可以转递一个用于排序的函数
 
-这两个方法的返回值都是排序之后的数组，不影响原数组（即排序的是原数组的一个副本）。
+这两个方法的返回值都是排序之后的数组。
 
 #### 操作方法
 
@@ -546,3 +546,135 @@ var sum = function(num1, num2){
     return num1 + num2;
 };
 ```
+
+#### 函数内部属性
+
+1. arguments.callee:指向拥有这个arguments 对象的函数的指针
+2. this:指向当前函数的执行环境的环境变量对象的指针。
+3. caller:指向调用当前函数的函数的引用。
+4. 严格模式
+
+    当函数在严格模式下运行时，访问arguments.callee 会导致错误。ECMAScript 5 还定义了arguments.caller 属性，但在严格模式下访问它也会导致错误，而在非严格模式下这个属性始终是undefined。定义这个属性是为了分清arguments.caller 和函数的caller 属性。以上变化都是为了加强这门语言的安全性，这样第三方代码就不能在相同的环境里窥视其他代码了。严格模式还有一个限制：不能为函数的caller 属性赋值，否则会导致错误。
+
+#### 函数的属性和方法（作为对象而言）
+
+1. length:表示函数希望接收的命名参数的个数(也就是函数声明时形参的个数)。
+2. prototype：ECMAScript 中的引用类型而言，prototype 是保存它们所有实例方法的真正所在
+
+    诸如toString()和valueOf()等方法实际上都保存在prototype 名下，只不过是通过各自对象的实例访问罢了。在创建自定义引用类型以及实现继承时，prototype 属性的作用是极为重要的）。在ECMAScript 5 中，prototype 属性是不可枚举的，因此使用for-in 无法发现。
+
+3. apply()和call():。这两个方法的用途都是在特定的作用域中调用函数（实际上等于设置函数体内this 对象的值）
+
+    apply()和call()的区别仅仅是传递的函数调用参数的方式不同。allply使用的是参数数组，而call是单独传递每一个参数。
+
+    传递参数并非apply()和call()真正的用武之地；它们真正强大的地方是能够扩充函数赖以运行的作用域。
+
+    ```javascript
+    window.color = "red";
+    var o = { color: "blue" };
+    function sayColor(){
+            alert(this.color);
+    }
+    sayColor(); //red
+    sayColor.call(this); //red
+    sayColor.call(window); //red
+    sayColor.call(o); //blue
+    ```
+
+4. bind():ES5,创建函数的实例，其this（执行环境变量对象）的值会被绑定到传给bind()函数的值
+
+    ```javascript
+    window.color = "red";
+    var o = { color: "blue" };
+    function sayColor(){
+        alert(this.color);
+    }
+    var objectSayColor = sayColor.bind(o);
+    objectSayColor(); //blue
+    ```
+
+### 4.6 基本类型的包装类
+
+1. 包装类型的由来
+
+    为了便于操作基本类型值，ECMAScript 还提供了3 个特殊的引用类型：Boolean、Number 和String。这些类型与本章介绍的其他引用   类型相似，但同时也具有与各自的基本类型相应的特殊行为。实际上，**每当读取一个基本类型值的时候，后台就会创建一个对应的基本   包装类型的对象**，从而让我们能够调用一些方法来操作这些数据。
+
+    ```javascript
+    var s1 = "some text";
+    var s2 = s1.substring(2);
+
+    /*
+    这个例子中的变量s1 包含一个字符串，字符串当然是基本类型值。而下一行调用了s1 的
+    substring()方法，并将返回的结果保存在了s2 中。我们知道，基本类型值不是对象，因而从逻辑上
+    讲它们不应该有方法（尽管如我们所愿，它们确实有方法）。其实，为了让我们实现这种直观的操作，
+    后台已经自动完成了一系列的处理。当第二行代码访问s1 时，访问过程处于一种读取模式，也就是要
+    从内存中读取这个字符串的值。而在读取模式中访问字符串时，后台都会自动完成下列处理。
+    (1) 创建String 类型的一个实例；
+    (2) 在实例上调用指定的方法；
+    (3) 销毁这个实例。
+    */
+
+    var s1 = new String("some text");
+    var s2 = s1.substring(2);
+    s1 = null;
+    ```
+
+2. 包装类型和基本类型的区别
+
+    引用类型与基本包装类型的主要区别就是对象的生存期。使用new 操作符创建的引用类型的实例，在执行流离开当前作用域之前都一直保存在内存中。而自动创建的基本包装类型的对象，则只存在于一行代码的执行瞬间，然后立即被销毁。这意味着我们不能在运行时为基本类 型值添加属性和方法。
+
+    ```javascript
+    var s1 = "some text";
+    // 因为基本类型没有属性和方法，这里创建属性实际上是自动创建了它的包装类型来添加对象
+    s1.color = "red";
+    //但是由于自动创建的包装类型的对象，执行了添加属性操作之后，就销毁了。
+    alert(s1.color); //undefined
+    ```
+
+Object 构造函数也会像工厂方法一样，根据传入值的类型返回相应基本包装类型的实例。
+
+```javascript
+var value = "25";
+var number = Number(value); //转型函数
+alert(typeof number); //"number"
+
+var obj = new Number(value); //构造函数
+alert(typeof obj); //"object"
+```
+
+### String包装类型
+
+#### 取出特定位置的字符
+
+    - charAt()
+    - charCodeAt()
+
+#### 字符串操作：联结、取子串
+
+    - concat()
+    - slice()
+    - substr()
+    - subString()
+
+#### 查找字符串中子串的位置
+
+- indexOf()
+- lastIndexOf()
+
+#### trim()
+
+#### 大小写转换
+
+#### 字符串的正则匹配方法
+
+- match()
+- search()
+- replace()
+- split()
+
+#### 其他方法
+
+- localCompare()
+- fromCharCode()
+
+String 构造函数本身还有一个静态方法：fromCharCode()。这个方法的任务是接收一或多个字符编码，然后将它们转换成一个字符串。从本质上来看，这个方法与实例方法charCodeAt()执行的是相反的操作。
