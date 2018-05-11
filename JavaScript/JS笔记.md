@@ -631,50 +631,89 @@ var sum = function(num1, num2){
     alert(s1.color); //undefined
     ```
 
-Object 构造函数也会像工厂方法一样，根据传入值的类型返回相应基本包装类型的实例。
+    Object 构造函数也会像工厂方法一样，根据传入值的类型返回相应基本包装类型的实例。
 
-```javascript
-var value = "25";
-var number = Number(value); //转型函数
-alert(typeof number); //"number"
+    ```javascript
+    var value = "25";
+    var number = Number(value); //转型函数
+    alert(typeof number); //"number"
 
-var obj = new Number(value); //构造函数
-alert(typeof obj); //"object"
-```
+    var obj = new Number(value); //构造函数
+    alert(typeof obj); //"object"
+    ```
 
-### String包装类型
+#### String包装类型
 
-#### 取出特定位置的字符
+1. 取出特定位置的字符
 
     - charAt()
     - charCodeAt()
 
-#### 字符串操作：联结、取子串
+2. 字符串操作：联结、取子串
 
     - concat()
     - slice()
     - substr()
     - subString()
 
-#### 查找字符串中子串的位置
+3. 查找字符串中子串的位置
 
-- indexOf()
-- lastIndexOf()
+    - indexOf()
+    - lastIndexOf()
 
-#### trim()
+4. trim()
+5. 大小写转换
+6. 字符串的正则匹配方法
 
-#### 大小写转换
+    - match()
+    - search()
+    - replace()
+    - split()
 
-#### 字符串的正则匹配方法
+7. 其他方法
 
-- match()
-- search()
-- replace()
-- split()
+    - localCompare()
+    - fromCharCode()
 
-#### 其他方法
+    String 构造函数本身还有一个静态方法：fromCharCode()。这个方法的任务是接收一或多个字符编码，然后将它们转换成一个字符串。 从本质上来看，这个方法与实例方法charCodeAt()执行的是相反的操作。
 
-- localCompare()
-- fromCharCode()
+### 单体内置对象:Global/Math
 
-String 构造函数本身还有一个静态方法：fromCharCode()。这个方法的任务是接收一或多个字符编码，然后将它们转换成一个字符串。从本质上来看，这个方法与实例方法charCodeAt()执行的是相反的操作。
+ECMA-262 对内置对象的定义是：“由ECMAScript 实现提供的、不依赖于宿主环境的对象，这些对象在ECMAScript 程序执行之前就已经存在了。”意思就是说，开发人员**不必显式地实例化内置对象**，因为它们已经实例了。前面我们已经介绍了大多数内置对象，例如Object、Array 和String。ECMA-262 还定义了两个单体内置对象：Global 和Math。
+
+#### Global对象
+
+Global（全局）对象可以说是ECMAScript 中最特别的一个对象了，因为不管你从什么角度上看，这个对象都是不存在的。ECMAScript 中的Global 对象在某种意义上是作为一个终极的“兜底儿对象”来定义的。换句话说，不属于任何其他对象的属性和方法，最终都是它的属性和方法。**事实上，没有全局变量或全局函数；所有在全局作用域中定义的属性和函数，都是Global 对象的属性**。本书前面介绍过的那些函数，诸如isNaN()、isFinite()、parseInt()以及parseFloat()，实际上全都是Global对象的方法。
+
+1. URI编码方法
+2. eval()
+
+3. Global对象的属性
+
+    Global 对象还包含一些属性，例如特殊的值undefined、NaN 以及Infinity 都是Global 对象的属性。此外，所有原生引用类型的构造函数，像Object 和Function，也都是Global 对象的属性。
+
+    ECMAScript 5 明确禁止给undefined、NaN 和Infinity 赋值，这样做即使在非严格模式下也会导致错误。
+
+4. Window对象
+
+ECMAScript 虽然没有指出如何直接访问Global 对象，**但Web 浏览器都是将这个全局对象作为window 对象的一部分加以实现的**。因此，在全局作用域中声明的所有变量和函数，就都成为了window对象的属性。
+
+另一种取得Global 对象的方法是使用以下代码：
+
+```javascript
+
+/**
+以下代码创建了一个立即调用的函数表达式，返回this 的值。如前所述，在没有给函数明确指定this 值的情况下（无论是通过将函数添加为对象的方法，还是通过调用call()或apply()），this值等于Global 对象。而像这样通过简单地返回this 来取得Global 对象，在任何执行环境下都是可行的。
+*/
+var global = function(){
+return this;
+}();
+```
+
+#### Math对象
+
+## 六、 OOP
+
+面向对象（Object-Oriented，OO）的语言有一个标志，那就是它们都有类的概念，而通过类可以创建任意多个具有相同属性和方法的对象。**ECMAScript 中没有类的概念**，因此它的对象也与基于类的语言中的对象有所不同。ECMA-262 把对象定义为：“**无序属性的集合，其属性可以包含基本值、对象或者函数**。”严格来讲，这就相当于说对象是一组没有特定顺序的值。对象的每个属性或方法都有一个名字，而每个名字都映射到一个值。正因为这样（以及其他将要讨论的原因），我们可以把ECMAScript 的对象想象成散列表：无非就是一组名值对，其中值可以是数据或函数。每个对象都是基于一个引用类型创建的，这个引用类型可以是原生类型，也可以是开发人员定义的类型。
+
+### 6.1 理解对象
