@@ -186,7 +186,7 @@ ECMAScript 变量可能包含两种不同数据类型的值：基本类型值和
 
 #### 引用类型检测：instanceof
 
-### 3.2 执行环境及作用域:变量的作用域
+### 3.2 执行环境及作用域
 
 **执行环境（作用域）**（execution context，为简单起见，有时也称为“环境”）是JavaScript 中最为重要的一个概念。执行环境定义了变量的生命周期，以及哪一部分代码可以访问其中的变量。
 
@@ -196,7 +196,7 @@ ECMAScript 变量可能包含两种不同数据类型的值：基本类型值和
 
 **函数执行环境**：**每个函数都有自己的执行环境**。当执行流进入一个函数时，函数的环境就会被推入一个环境栈中。而在函数执行之后，栈将其环境弹出，把控制权返回给之前的执行环境。ECMAScript 程序中的执行流正是由这个方便的机制控制着。
 
-**作用域链**：当代码在一个环境中执行时，会创建变量对象的一个作用域链（scope chain）。作用域链的用途，是保证对执行环境有权访问的所有变量和函数的有序访问。作用域链的前端，始终都是当前执行的代码所在环境的变量对象。如果这个环境是函数，则将其活动对象（activation object）作为变量对象。活动对象在最开始时只包含一个变量，即arguments 对象（这个对象在全局环境中是不存在的）。作用域链中的下一个变量对象来自**包含（外部）环境**，而再下一个变量对象则来自下一个包含环境。这样，一直延续到全局执行环境；全局执行环境的变量对象始终都是作用域链中的最后一个对象。
+**作用域链**：当代码在一个环境中执行时，会创建变量对象的一个作用域链（scope chain）。作用域链的用途，是保证对执行环境有权访问的所有变量和函数的有序访问。作用域链的前端，始终都是当前执行的代码所在环境的变量对象。如果这个环境是函数，则将其活动对象（activation object）作为变量对象。活动对象在最开始时只包含一个变量，即**arguments 对象**（这个对象在全局环境中是不存在的）。作用域链中的下一个变量对象来自**包含（外部）环境**，而再下一个变量对象则来自下一个包含环境。这样，一直延续到全局执行环境；全局执行环境的变量对象始终都是作用域链中的最后一个对象。
 
 **标识符解析**是沿着作用域链一级一级地搜索标识符的过程。搜索过程始终从作用域链的前端开始，然后逐级地向后回溯，直至找到标识符为止（如果找不到标识符，通常会导致错误发生）。也就是从局部到外部到全局的搜索过程。
 
@@ -549,12 +549,28 @@ var sum = function(num1, num2){
 
 #### 函数内部属性
 
+在函数内部，有两个特殊的对象：arguments 和this；
+
 1. arguments.callee:指向拥有这个arguments 对象的函数的指针
 2. this:指向当前函数的执行环境的环境变量对象的指针。
 3. caller:指向调用当前函数的函数的引用。
 4. 严格模式
 
     当函数在严格模式下运行时，访问arguments.callee 会导致错误。ECMAScript 5 还定义了arguments.caller 属性，但在严格模式下访问它也会导致错误，而在非严格模式下这个属性始终是undefined。定义这个属性是为了分清arguments.caller 和函数的caller 属性。以上变化都是为了加强这门语言的安全性，这样第三方代码就不能在相同的环境里窥视其他代码了。严格模式还有一个限制：不能为函数的caller 属性赋值，否则会导致错误。
+
+```javascript
+window.color = "red";
+var o = {
+    color: "blue"
+};
+
+function sayColor() {
+    alert(this.color);
+}
+sayColor(); //"red"
+o.sayColor = sayColor;  //将函数赋值给对象的属性，并通过对象调用，此时this引用的是该对象
+o.sayColor(); //"blue"
+```
 
 #### 函数的属性和方法（作为对象而言）
 
@@ -717,3 +733,190 @@ return this;
 面向对象（Object-Oriented，OO）的语言有一个标志，那就是它们都有类的概念，而通过类可以创建任意多个具有相同属性和方法的对象。**ECMAScript 中没有类的概念**，因此它的对象也与基于类的语言中的对象有所不同。ECMA-262 把对象定义为：“**无序属性的集合，其属性可以包含基本值、对象或者函数**。”严格来讲，这就相当于说对象是一组没有特定顺序的值。对象的每个属性或方法都有一个名字，而每个名字都映射到一个值。正因为这样（以及其他将要讨论的原因），我们可以把ECMAScript 的对象想象成散列表：无非就是一组名值对，其中值可以是数据或函数。每个对象都是基于一个引用类型创建的，这个引用类型可以是原生类型，也可以是开发人员定义的类型。
 
 ### 6.1 理解对象
+
+#### 属性类型
+
+ECMA-262 第5 版在定义只有内部才用的特性（attribute）时，描述了属性（property）的各种特征。ECMA-262 定义这些特性是为了实现JavaScript 引擎用的，因此在JavaScript 中不能直接访问它们。为了表示特性是内部值，该规范把它们放在了两对儿方括号中，例如[[Enumerable]]。
+
+内部属性的类型分为：数据属性和访问器属性。
+
+1. 数据属性
+
+    数据属性包含一个数据值的位置。在这个位置可以读取和写入值。数据属性有4 个描述其行为的特性。
+    - [[Configurable]]
+    - [[Enumerable]]
+    - [[Writeable]]
+    - [[Value]]
+
+    要修改属性默认的特性，必须使用ECMAScript 5 的Object.defineProperty()方法。
+
+2. 访问器属性
+
+    访问器属性不包含数据值；它们包含一对儿getter 和setter 函数（不过，这两个函数都不是必需的）。在读取访问器属性时，会调用getter 函数，这个函数负责返回有效的值；在写入访问器属性时，会调用setter 函数并传入新值，这个函数负责决定如何处理数据。访问器属性有如下4 个特性。
+    - [[Configurable]]
+    - [[Enumerable]]
+    - [[Get]]
+    - [[Set]]
+
+    访问器属性不能直接定义，必须使用Object.defineProperty()来定义。
+
+    tip:
+    - 在这个方法之前， 要创建访问器属性， 一般都使用两个非标准的方法：__defineGetter__()和__defineSetter__()。
+    - 在不支持Object.defineProperty() 方法的浏览器中不能修改[[Configurable]] 和[[Enumerable]]。
+
+#### 定义多个属性
+
+    由于为对象定义多个属性的可能性很大，ECMAScript 5 又定义了一个Object.defineProperties()方法。利用这个方法可以通过描述符一次定义多个属性。
+
+    ```javascript
+    var book = {};
+    Object.defineProperties(book, {
+    _year: {
+        value: 2004
+    },
+    edition: {
+        value: 1
+    },
+    year: {
+        get: function(){return this._year;
+        },
+        set: function(newValue){
+            if (newValue > 2004) {
+              this._year = newValue;
+              this.edition += newValue - 2004;
+         }
+        }
+    }
+    });
+    ```
+
+#### 读取属性的特征
+
+使用ECMAScript 5 的Object.getOwnPropertyDescriptor()方法，可以取得给定属性的描述符。这个方法接收两个参数：属性所在的对象和要读取其描述符的属性名称。返回值是一个对象，如果是访问器属性，这个对象的属性有configurable、enumerable、get 和set；如果是数据属性，这个对象的属性有configurable、enumerable、writable 和value。
+
+### 6.2 创建对象
+
+虽然Object 构造函数或对象字面量都可以用来创建单个对象，但这些方式有个明显的缺点：使用同一个接口创建很多对象，会产生大量的重复代码。为解决这个问题，人们开始使用工厂模式的一种变体。
+
+#### 工厂模式
+
+工厂模式是软件工程领域一种广为人知的设计模式，这种模式抽象了创建具体对象的过程，考虑到在ECMAScript 中无法创建类，开发人员就发明了一种函数，用函数来封装以特定接口创建对象的细节
+
+```javascript
+function createPerson(name, age, job) {
+    var o = new Object();
+    o.name = name;
+    o.age = age;
+    o.job = job;
+    o.sayName = function () {
+        alert(this.name);
+    };
+    return o;
+}
+var person1 = createPerson("Nicholas", 29, "Software Engineer");
+var person2 = createPerson("Greg", 27, "Doctor");
+```
+
+工厂模式虽然解决了创建多个相似对象的问题，但却没有解决对象识别的问题（即怎样知道一个对象的类型）。
+
+#### 构造函数模式
+
+```javascript
+function Person(name, age, job) {
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.sayName = function () {
+        alert(this.name);
+    };
+}
+var person1 = new Person("Nicholas", 29, "Software Engineer");
+var person2 = new Person("Greg", 27, "Doctor");
+```
+
+在上面的例子中，Person()函数取代了createPerson()函数。我们注意到，Person()中的代码除了与createPerson()中相同的部分外，还存在以下不同之处：
+
+- 没有显式地创建对象
+- 直接将属性和方法赋给了this对象
+- 没有return语句
+
+此外，还应该注意到函数名Person 使用的是大写字母P。按照惯例，构造函数始终都应该以一个大写字母开头，而非构造函数则应该以一个小写字母开头。这个做法借鉴自其他OO 语言，主要是为了区别于ECMAScript 中的其他函数；因为构造函数本身也是函数，只不过可以用来创建对象而已。
+
+要创建Person对象的新实例，必须使用new 操作符。以这种方式调用构造函数实际上会经历以下4个步骤：
+
+- 创建一个新对象；
+- 将构造函数的作用域赋值为新对象（因此this 就指向了这个新对象）；
+- 执行构造函数中的代码（为这个新对象添加属性）；
+- 返回新对象。
+
+在前面例子的最后，person1 和person2 分别保存着Person 的一个不同的实例。这两个对象都有一个constructor（构造函数）属性，该属性指向Person
+
+```javascript
+alert(person1.constructor == Person); //true
+alert(person2.constructor == Person); //true
+
+/** 对象的constructor 属性最初是用来标识对象类型的。但是，提到检测对象类型，还是instanceof操作符要更可靠一些。我们在这个例子中创建的所有对象既是Object 的实例，同时也是Person的实例，这一点通过instanceof 操作符可以得到验证。
+*/
+alert(person1 instanceof Object); //true
+alert(person1 instanceof Person); //true
+alert(person2 instanceof Object); //true
+alert(person2 instanceof Person); //true
+```
+
+创建自定义的构造函数意味着将来可以将它的实例标识为一种特定的类型；而这正是构造函数模式胜过工厂模式的地方。
+
+1. 将构造函数当函数使用
+
+    构造函数与其他函数的唯一区别，就在于调用它们的方式不同。不过，构造函数毕竟也是函数，不存在定义构造函数的特殊语法。任何函数，只要通过new 操作符来调用，那它就可以作为构造函数；而任何函数，如果不通过new 操作符来调用，那它跟普通函数也不会有什么两样。
+
+    ```javascript
+    // 当作构造函数使用
+    var person = new Person("Nicholas", 29, "Software Engineer");
+    person.sayName(); //"Nicholas"
+    // 作为普通函数调用，此时是在全局作用域中调用，此时this指向的就是window
+    Person("Greg", 27, "Doctor"); // 添加到window
+    window.sayName(); //"Greg"
+    // 在另一个对象的作用域中调用
+    var o = new Object();
+    Person.call(o, "Kristen", 25, "Nurse");
+    o.sayName(); //"Kristen"
+    ```
+
+2. 构造函数的问题
+
+构造函数模式虽然好用，但也并非没有缺点。使用构造函数的主要问题，就是每个方法都要在每个实例上重新创建一遍。在前面的例子中，person1 和person2 都有一个名为sayName()的方法，但那两个方法不是同一个Function 的实例。不要忘了——ECMAScript 中的函数是对象，因此每定义一个函数，也就是实例化了一个对象。从逻辑角度讲，此时的构造函数也可以这样定义。
+
+```javascript
+function Person(name, age, job){
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.sayName = new Function("alert(this.name)"); // 与声明函数在逻辑上是等价的
+}
+```
+
+从这个角度上来看构造函数，更容易明白每个Person 实例都包含一个不同的Function 实例（以显示name 属性）的本质。说明白些，以这种方式创建函数，**会导致不同的作用域链和标识符解析**，但创建Function 新实例的机制仍然是相同的。因此，不同实例上的同名函数是不相等的，以下代码可以证明这一点。
+
+```javascript
+alert(person1.sayName == person2.sayName); //false
+```
+
+然而，创建两个完成同样任务的Function 实例的确没有必要；况且有this 对象在，根本不用在执行代码前就把函数绑定到特定对象上面。因此，大可像下面这样，通过把函数定义转移到构造函数外部来解决这个问题。
+
+```javascript
+function Person(name, age, job){
+this.name = name;
+this.age = age;
+this.job = job;
+this.sayName = sayName;
+}
+function sayName(){
+alert(this.name);
+}
+var person1 = new Person("Nicholas", 29, "Software Engineer");
+var person2 = new Person("Greg", 27, "Doctor");
+```
+
+这样做确实解决了两个函数做同一件事的问题，可是新问题又来了：在全局作用域中定义的函数实际上只能被某个对象调用，这让全局作用域有点名不副实。而更让人无法接受的是：如果对象需要定义很多方法，那么就要定义很多个全局函数，于是我们这个自定义的引用类型就丝毫没有封装性可言了。好在，这些问题可以通过使用原型模式来解决。
+
+#### 原型模式（重要）
