@@ -1184,9 +1184,9 @@ tip:与寄生构造函数模式类似，使用稳妥构造函数模式创建的�
 
 #### 原型链
 
-ECMAScript 中描述了原型链的概念，并将原型链作为实现继承的主要方法。其基本思想是利用原型让一个引用类型继承另一个引用类型的属性和方法。
+ECMAScript 中描述了原型链的概念，**并将原型链作为实现继承的主要方法**。其基本思想是利用原型让一个引用类型继承另一个引用类型的属性和方法。
 
-简单回顾一下构造函数、原型和实例的关系：每个构造函数都有一个原型对象，原型对象都包含一个指向构造函数的指针，而实例都包含一个指向原型对象的内部指针。**那么，假如我们让原型对象等于另一个类型的实例，结果会怎么样呢？显然，此时的原型对象将包含一个指向另一个原型的指针，相应地，另一个原型中也包含着一个指向另一个构造函数的指针。假如另一个原型又是另一个类型的实例，那么上述关系依然成立，如此层层递进，就构成了实例与原型的链条。**这就是所谓原型链的基本概念。
+简单回顾一下构造函数、原型和实例的关系：每个（构造）函数都有一个原型对象，原型对象都包含一个指向构造函数的指针，而实例都包含一个指向原型对象的内部指针。**那么，假如我们让原型对象等于另一个类型的实例，结果会怎么样呢？显然，此时的原型对象将包含一个指向另一个原型的指针，相应地，另一个原型中也包含着一个指向另一个构造函数的指针。假如另一个原型又是另一个类型的实例，那么上述关系依然成立，如此层层递进，就构成了实例与原型的链条。**这就是所谓原型链的基本概念，**利用是实例与原型对象之间的关系和原型搜索机制**。
 
 实现原型链有一种基本模式，其代码大致如下：
 
@@ -1201,11 +1201,56 @@ SuperType.prototype.getSuperValue = function () {
 function SubType() {
     this.subproperty = false;
 }
-//继承了SuperType
+//继承了SuperType：将prototype指向一个SuperType类型的实例，所有的SubType实例，都共享(即拥有、继承)SuperType的属性和方法
 SubType.prototype = new SuperType();
 SubType.prototype.getSubValue = function () {
     return this.subproperty;
 };
+
+/*
+实例与原型对象之间的关系：
+a) instacen._proto_ -> SubType.prototype : instacne拥有所有Subtype.prototype对象的属性方法
+b) SubType.prototype -> SuperType()实例 : 子类型原型对象指向父类型实例。结合a,即子类型实例拥有父类型的属性和方法。
+c) SuperType实例._proto_ -> SuperType.prototype : 结合a和b，即子类型实例拥有父类型的构造函数定义的属性和方法以及父类型原型对象定义的属性和方法。
+
+原型搜索机制：
+a) 搜索SubType实例instace
+b) 搜索SubType.prototype，即SuperType实例
+3) 搜索SuperType.prototype
+*/
 var instance = new SubType();
 alert(instance.getSuperValue()); //true
 ```
+
+1. 别忘了默认原型:Object实例
+
+    所有引用类型默认都继承了Object，而这个继承也是通过原型链实现的。所有函数的默认原型都是**Object 的实例**，因此默认原型(Object实例)都会包含一个内部指针，指向Object.prototype。这也正是所有自定义类型都会继承toString()、valueOf()等默认方法的根本原因。
+
+2. 确定实例与原型之间的关系
+
+    - instanceof操作符
+    - isPrototypeOf()方法
+
+3. 谨慎的定义方法
+    子类型有时候需要重写超类型中的某个方法，或者需要添加超类型中不存在的某个方法。但不管怎样，给原型添加方法的代码一定要放在替换原型的语句之后（先添加再替换原型对象：添加的方法或者属性在原来的原型对象中，由于原型对象被覆盖，那么先添加也就没有意义）。
+
+4. 原型链的问题
+
+    原型链虽然很强大，可以用它来实现继承，但它也存在一些问题。其中，最主要的问题来自包含引用类型值的原型。**包含引用类型值的原型属性会被所有实例共享**；而这也正是为什么要在构造函数中，而不是在原型对象中定义属性的原因。**在通过原型来实现继承时，原型实际上会变成另一个类型的实例。于是，原先的实例属性也就顺理成章地变成了现在的原型属性了**。下列代码可以用来说明这个问题。
+
+    ```javascript
+    function SuperType() {
+    this.colors = ["red", "blue", "green"];
+    }
+
+    function SubType() {}
+    //继承了SuperType
+    SubType.prototype = new SuperType();
+    var instance1 = new SubType();
+    instance1.colors.push("black");
+    alert(instance1.colors); //"red,blue,green,black"
+    var instance2 = new SubType();
+    alert(instance2.colors); //"red,blue,green,black"
+    ```
+
+    原型链的第二个问题是：在创建子类型的实例时，不能向超类型的构造函数中传递参数。实际上，应该说是没有办法在不影响所有对象实例的情况下，给超类型的构造函数传递参数。有鉴于此，再加上前面刚刚讨论过的由于原型中包含引用类型值所带来的问题，实践中很少会单独使用原型链。
