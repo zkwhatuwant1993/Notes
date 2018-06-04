@@ -46,6 +46,18 @@ use strict;
 
 ## 二、 基本概念
 
+### 2.0 语法
+
+#### 区分大小写
+
+#### 标识符
+
+#### 注释
+
+#### 语句
+
+ECMAScript 中的语句以一个分号结尾；如果省略分号，则由解析器确定语句的结尾。
+
 ### 2.1 基本数据类型
 
 按照ECMA-262 的定义，JavaScript 的变量与其他语言的变量有很大区别。JavaScript 变量松散类型的本质，决定了它只是在特定时间用于保存特定值的一个名字而已。由于不存在定义某个变量必须要保存何种数据类型值的规则，变量的值及其数据类型可以在脚本的生命周期内改变。
@@ -132,17 +144,17 @@ Object的每个实例都具有的属性和方法：
     - 如果第一个操作数是对象，则返回第一个操作数
     - 如果两个操作数都是null，返回null，否则返回非null的那一个操作数。undefined和NaN同理
 
-### 数学运算
+#### 数学运算
 
-### 关系运算
+#### 关系运算
 
-### 相等运算
+#### 相等运算
 
 #### 等于或不等于：强制类型转换
 
 #### 全等或不全等：不类型转换
 
-### 2.3 语句
+### 2.3 流程控制语句
 
 #### for-in：遍历（枚举）对象属性
 
@@ -194,13 +206,21 @@ ECMAScript 变量可能包含两种不同数据类型的值：基本类型值和
 
 **全局执行环境**是最外围的一个执行环境。根据ECMAScript 实现所在的宿主环境不同，表示执行环境的对象也不一样。在Web 浏览器中，全局执行环境被认为是window 对象，因此所有全局变量和函数都是作为window 对象的属性和方法创建的。某个执行环境中的所有代码执行完毕后，该环境被销毁，保存在其中的所有变量和函数定义也随之销毁（全局执行环境直到应用程序退出——例如关闭网页或浏览器——时才会被销毁）。
 
-**函数执行环境（局部环境）**：**每个函数都有自己的执行环境**。当执行流进入一个函数时，函数的环境就会被推入一个环境栈中。而在函数执行之后，栈将其环境弹出，把控制权返回给之前的执行环境。ECMAScript 程序中的执行流正是由这个方便的机制控制着。
+**函数执行环境（局部环境）**：**每个函数都有自己的执行环境**。当执行流进入一个函数时，函数的环境就会被推入一个**环境栈**中。而在函数执行之后，栈将其环境弹出，把控制权返回给之前的执行环境。ECMAScript 程序中的执行流正是由这个方便的机制控制着。
 
 **函数的活动对象**：在一个函数对象被调用的时候，会创建一个活动对象，首先将该函数的每个形参和实参，都添加为该活动对象的属性和值；将该函数体内显示声明的变量和函数，也添加为该活动的的属性（在刚进入该函数执行环境时，未赋值，所以值为undefined，这个是JS的提前声明机制）
 
 **作用域链**：当代码在一个环境中执行时，会创建变量对象的一个作用域链（scope chain）。作用域链的用途，是保证对执行环境有权访问的所有变量和函数的有序访问。**作用域链的前端，始终都是当前执行环境的变量对象**。如果这个环境是函数，则将其**活动对象**（activation object）作为变量对象。活动对象在最开始时只包含一个变量，即**arguments 对象**（这个对象在全局环境中是不存在的）。作用域链中的下一个变量对象来自**包含（外部）环境**，而再下一个变量对象则来自下一个包含环境。这样，一直延续到全局执行环境；全局执行环境的变量对象始终都是作用域链中的最后一个对象。
 
 **标识符解析**是沿着作用域链一级一级地搜索标识符的过程。搜索过程始终从作用域链的前端开始，然后逐级地向后回溯，直至找到标识符为止（如果找不到标识符，通常会导致错误发生）。也就是从局部到外部到全局的搜索过程。
+
+[参考：作用域链](https://www.jianshu.com/p/181da2b57eb2)
+
+总结：
+
+1. 当进入一个执行环境时，会创建相应的环境变量/活动对象
+2. 当代码在一个环境中执行时，会创建变量对象的一个作用域链（scope chain），作用域链前端始终指向
+3. 标识符解析：沿着作用域链前端一级一级的搜索的过程。
 
 ```javascript
 var color = "blue";
@@ -1403,8 +1423,234 @@ SubType.prototype.sayAge = function () {
 
 ```javascript
 function inheritPrototype(subType, superType) {
-    var prototype = object(superType.prototype); //创建对象
-    prototype.constructor = subType; //增强对象
-    subType.prototype = prototype; //指定对象
+    var prototype = object(superType.prototype); //创建对象:使用原型继承快速生成一个继承父类原型对象(只继承方法)的对象。
+    prototype.constructor = subType; //增强对象：覆盖原型对象那共享的属性
+    subType.prototype = prototype; //指定对象: SubType继承
+}
+
+function SuperType(name) {
+    this.name = name;
+    this.colors = ["red", "blue", "green"];
+}
+SuperType.prototype.sayName = function () {
+    alert(this.name);
+};
+
+function SubType(name, age) {
+    SuperType.call(this, name);
+    this.age = age;
+}
+inheritPrototype(SubType, SuperType);
+SubType.prototype.sayAge = function () {
+    alert(this.age);
+};
+```
+
+## 七、函数表达式
+
+### 7.1 匿名函数
+
+定义函数的方式有两种：一种是函数声明，另一种就是函数表达式
+
+函数声明定义:
+
+```javascript
+//命名函数
+function funcName(arg0, arg1) {
+    //body
 }
 ```
+
+首先是function 关键字，然后是函数的名字，这就是指定函数名的方式。Firefox、Safari、Chrome和Opera 都给函数定义了一个**非标准(不是Emacscript定义的标准)**的name 属性，通过这个属性可以访问到给函数指定的名字。这个属性的值永远等于跟在function 关键字后面的标识符。
+
+```javascript
+alert(funcName.name); //"funcName"
+```
+
+函数表达式有几种不同的语法形式。下面是最常见的一种形式。：
+
+```javascript
+var functionName = function(arg0, arg1, arg2){
+    //函数体
+};
+```
+
+这种形式看起来好像是常规的变量赋值语句，即创建一个函数并将它赋值给变量functionName。这种情况下创建的函数叫做**匿名函数（anonymous function）**，因为function 关键字后面没有标识符。（匿名函数有时候也叫拉姆达函数。）匿名函数的name 属性是空字符串。
+
+### 7.2 函数声明提升
+
+关于函数声明，它的一个重要特征就是函数声明提升（function declaration hoisting），意思是在执行代码之前会先读取函数声明。这就意味着可以把函数声明放在调用它的语句后面。
+
+```javascript
+sayHi();
+function sayHi() {
+    alert("Hi!");
+}
+```
+
+理解函数提升的关键，就是理解函数声明与函数表达式之间的区别。
+
+```javascript
+//eg1
+sayHi(); //错误：函数还不存在。因为使用的是函数表达式定义，不是函数声明，也就不存在函数声明提升。
+var sayHi = function () {
+    alert("Hi!");
+};
+```
+
+```javascript
+//eg2
+//不要这样做！
+// 1. JS没有块级作用域，而两个分支中都是声明，实际上就是在全局进行了声明。
+// 2. 由于函数声明提升，两个声明冲突，此时执行效果依赖于浏览器的实现。
+if (condition) {
+    function sayHi() {
+        alert("Hi!");
+    }
+} else {
+    function sayHi() {
+        alert("Yo!");
+    }
+}
+```
+
+```javascript
+//eg3
+//可以这样做。因为两个条件分支使用的是语句(函数表达式)，能够正确执行。
+var sayHi;
+if (condition) {
+    sayHi = function () {
+        alert("Hi!");
+    };
+} else {
+    sayHi = function () {
+        alert("Yo!");
+    };
+}
+```
+
+使用匿名函数作为函数返回值:
+
+```javascript
+function Foo() {
+    return function() {};
+}
+```
+
+### 7.3 递归
+
+递归函数是在一个函数通过名字调用自身的情况下构成的，即在函数体中调用自身。
+
+```javascript
+function factorial(num) {
+    if (num <= 1) {
+        return 1;
+    } else {
+        return num * factorial(num - 1);
+    }
+}
+```
+
+这是一个经典的递归阶乘函数。虽然这个函数表面看来没什么问题，但下面的代码却可能导致它出错。
+
+```javascript
+var anotherFactorial = factorial;
+factorial = null;
+alert(anotherFactorial(4)); //Error
+// 由于变量factorial被赋值为null，再调用anoterFactorial时，函数体中执行factorial()，而此时factorial已经不再是函数
+```
+
+在这种情况下，使用arguments.callee 可以解决这个问题。
+
+```javascript
+function factorial(num) {
+    if (num <= 1) {
+        return 1;
+    } else {
+        return num * arguments.callee(num - 1);
+    }
+}
+```
+
+但在严格模式下，不能通过脚本访问arguments.callee，访问这个属性会导致错误。不过，可以使用命名函数表达式来达成相同的结果。例如：
+
+```javascript
+var factorial = (function f(num) {
+    if (num <= 1) {
+        return 1;
+    } else {
+        return num * f(num - 1);
+    }
+});
+```
+
+### 7.4 闭包（closure）
+
+闭包是指有权访问另一个函数作用域中的变量的函数(即访问了该函数的环境变量)。(闭包是一个函数，作用是可以通过他访问另一个函数作用域中的变量)。
+
+创建闭包的常见方式，就是在一个函数内部创建另一个函数：
+
+```javascript
+function createComparisonFunction(propertyName) {
+    return function (object1, object2) {
+        var value1 = object1[propertyName]; //内部函数访问了外部函数中的变量propertyName
+        var value2 = object2[propertyName];
+        if (value1 < value2) {
+            return -1;
+        } else if (value1 > value2) {
+            return 1;
+        } else {
+            return 0;
+        }
+    };
+}
+```
+
+在这个例子中，**内部函数（一个匿名函数）中的两行代码访问了外部函数中的变量propertyName。即使这个内部函数被返回了，而且是在其他地方被调用了，但它仍然可以访问变量propertyName。之所以还能够访问这个变量，是因为内部函数的作用域链中包含createComparisonFunction()的作用域。**要彻底搞清楚其中的细节，必须从理解函数被调用的时候都会发生什么入手（**作用域链**）。
+
+**作用域链**：当某个函数被调用时，会创建一个执行环境（execution context）及相应的作用域链。然后，使用arguments 和其他命名参数的值来初始化函数的活动对象（activation object）。但在作用域链中，外部函数的活动对象始终处于第二位，外部函数的外部函数的活动对象处于第三位，……直至作为作用域链终点的全局执行环境。
+
+在函数执行过程中，为读取和写入变量的值，就需要在作用域链中查找变量。例如下面这个例子
+
+```javascript
+
+/**
+ 下面的代码先定义了compare()函数，然后又在全局作用域中调用了它。当调用compare()时，会创建一个包含arguments、value1 和value2 的活动对象。全局执行环境的变量对象（包含result和compare）在compare()执行环境的作用域链中则处于第二位。图7-1 展示了包含上述关系的compare()函数执行时的作用域链。
+*/
+
+function compare(value1, value2) {
+    if (value1 < value2) {
+        return -1;
+    } else if (value1 > value2) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+var result = compare(5, 10);
+```
+
+![作用域链](/imgs\scope_chain1.png)图7-1
+
+后台的每个执行环境都有一个表示变量的对象——环境变量对象。全局环境的变量对象始终存在，而像compare()函数这样的局部环境的变量对象，则只在函数执行的过程中存在。在创建compare()函数时，会创建一个预先包含全局变量对象的作用域链，这个作用域链被保存在内部的[[Scope]]属性中。当调用compare()函数时，会为函数创建一个执行环境，然后通过复制函数的[[Scope]]属性中的对象(指针)构建起执行环境的作用域链。此后，又有一个活动对象（在此作为变量对象使用）被创建并被推入执行环境作用域链的前端。对于这个例子中compare()函数的执行环境而言，其作用域链中包含两个变量对象：本地活动对象和全局变量对象。**显然，作用域链本质上是一个指向变量对象的指针列表，它只引用但不实际包含变量对象**。
+
+**在函数内部定义的函数会将包含函数（即外部函数）的活动对象添加到内部函数的作用域链中**。因此，在createComparisonFunction()函数内部定义的匿名函数的作用域链中，实际上将会包含外部函数createComparisonFunction()的活动对象。
+
+无论什么时候在函数中访问一个变量时，就会从作用域链中搜索具有相应名字的变量。一般来讲，当函数执行完毕后，局部活动对象就会被销毁，内存中仅保存全局作用域（全局执行环境的变量对象）。但是，闭包的情况又有所不同，**因为还有变量持有内部函数的引用，而内部函数又持有外部函数作用域中的变量(也就是说外部函数的活动变量依然被匿名函数的作用域引用)**。
+
+在匿名函数从createComparisonFunction()中被返回后，它的作用域链被初始化为包含createComparisonFunction()函数的活动对象和全局变量对象。这样，匿名函数就可以访问在createComparisonFunction()中定义的所有变量。更为重要的是，createComparisonFunction()函数在执行完毕后，其活动对象也不会被销毁，**因为匿名函数的作用域链仍然在引用这个活动对象**。换句话说，当createComparisonFunction()函数返回后，**其执行环境的作用域链会被销毁，但它的活动对象仍然会留在内存中**；直到匿名函数被销毁后，createComparisonFunction()的活动对象才会被销毁
+
+```javascript
+//调用外部函数获得内部函数的引用
+var compareNames = createComparisonFunction("name");
+//调用内部函数
+var result = compareNames({ name: "Nicholas" }, { name: "Greg" });
+//解除对匿名函数的引用（以便释放内存）
+compareNames = null;
+```
+
+上面的例子，先创建的比较函数被保存在变量compareNames 中。而通过将compareNames 设置为等于null解除该函数的引用，就等于通知垃圾回收例程将其清除。随着匿名函数的作用域链被销毁，其他作用域（除了全局作用域）也都可以安全地销毁了。
+
+![闭包的作用域链](/imgs\scope_chain2.png)
+
+tip:
