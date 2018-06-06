@@ -226,7 +226,12 @@ ECMAScript 变量可能包含两种不同数据类型的值：基本类型值和
 
 **标识符解析**是沿着作用域链一级一级地搜索标识符的过程。搜索过程始终从作用域链的前端开始，然后逐级地向后回溯，直至找到标识符为止（如果找不到标识符，通常会导致错误发生）。也就是从局部到外部到全局的搜索过程。
 
-[参考：作用域链](https://www.jianshu.com/p/181da2b57eb2)
+[参考1：作用域链](https://www.jianshu.com/p/181da2b57eb2)
+[参考2：作用域链](https://yangbo5207.github.io/wutongluo/ji-chu-jin-jie-xi-lie/er-3001-zhi-xing-shang-xia-wen.html)
+
+#### 执行环境的生命周期
+
+![执行环境的生命周期](/imgs\执行环境的生命周期.png)
 
 总结：
 
@@ -586,11 +591,17 @@ var sum = function(num1, num2){
 在函数内部，有两个特殊的对象：arguments 和this；
 
 1. arguments.callee:指向拥有这个arguments 对象的函数的指针
-2. this:指向当前函数的执行环境的环境变量对象的指针。
+2. this:保存在函数据以执行环境的环境对象中。即this所引用的对象是在运行时基于函数的执行环境绑定的,不能手动改变。
 3. caller:指向调用当前函数的函数的引用。
 4. 严格模式
 
     当函数在严格模式下运行时，访问arguments.callee 会导致错误。ECMAScript 5 还定义了arguments.caller 属性，但在严格模式下访问它也会导致错误，而在非严格模式下这个属性始终是undefined。定义这个属性是为了分清arguments.caller 和函数的caller 属性。以上变化都是为了加强这门语言的安全性，这样第三方代码就不能在相同的环境里窥视其他代码了。严格模式还有一个限制：不能为函数的caller 属性赋值，否则会导致错误。
+
+关于this的指向：
+
+1. 在一个函数上下文中，this由调用者提供，由调用函数的方式来决定。如果被调用函数，被某一个对象所拥有，那么该函数在调用时，内部的this指向该对象。如果函数独立调用，那么该函数内部的this，则指向undefined。但是在非严格模式中，当this指向undefined时，它会被自动指向全局对象。
+
+2. 根据《JavaScript高级编程》书中的说法，执行函数时内置对象this和arguments都是保存在活动对象中的。如果活动求对象中的this默认为undefiend，在非严格模式下，会自动指向全局对象。
 
 ```javascript
 window.color = "red";
@@ -1648,7 +1659,7 @@ var result = compare(5, 10);
 
 **在函数内部定义的函数会将包含函数（即外部函数）的活动对象添加到内部函数的作用域链中**。因此，在createComparisonFunction()函数内部定义的匿名函数的作用域链中，实际上将会包含外部函数createComparisonFunction()的活动对象。
 
-无论什么时候在函数中访问一个变量时，就会从作用域链中搜索具有相应名字的变量。一般来讲，当函数执行完毕后，局部活动对象就会被销毁，内存中仅保存全局作用域（全局执行环境的变量对象）。但是，闭包的情况又有所不同，**因为还有变量持有内部函数的引用，而内部函数又持有外部函数作用域中的变量(也就是说外部函数的活动变量依然被匿名函数的作用域引用)**。
+无论什么时候在函数中访问一个变量时，就会从作用域链中搜索具有相应名字的变量。一般来讲，当函数执行完毕后，局部活动对象就会被销毁，内存中仅保存全局作用域（全局执行环境的变量对象）。但是，闭包的情况又有所不同，**因为还有变量持有内部函数的引用，而内部函数（函数也是对象）又持有外部函数作用域中的变量(也就是说外部函数的活动变量依然被匿名函数的作用域引用)**。
 
 在匿名函数从createComparisonFunction()中被返回后，它的作用域链被初始化为包含createComparisonFunction()函数的活动对象和全局变量对象。这样，匿名函数就可以访问在createComparisonFunction()中定义的所有变量。更为重要的是，createComparisonFunction()函数在执行完毕后，其活动对象也不会被销毁，**因为匿名函数的作用域链仍然在引用这个活动对象**。换句话说，当createComparisonFunction()函数返回后，**其执行环境的作用域链会被销毁，但它的活动对象仍然会留在内存中**；直到匿名函数被销毁后，createComparisonFunction()的活动对象才会被销毁
 
@@ -1664,3 +1675,218 @@ compareNames = null;
 上面的例子，先创建的比较函数被保存在变量compareNames 中。而通过将compareNames 设置为等于null解除该函数的引用，就等于通知垃圾回收例程将其清除。随着匿名函数的作用域链被销毁，其他作用域（除了全局作用域）也都可以安全地销毁了。
 
 ![闭包的作用域链](/imgs\scope_chain2.png)
+
+#### 函数与变量
+
+作用域链的这种配置机制引出了一个值得注意的副作用——闭包只能取得外部包含函数中任何变量的最后一个值。
+
+```javascript
+function createFunctions() {
+    var result = new Array();
+    for (var i = 0; i < 10; i++) {
+        result[i] = function () {
+            return i;
+        };
+    }
+    return result;
+}
+```
+
+上面例子，返回的函数数组中，似乎每个函数都应该返自己的索引值，即位置0 的函数返回0，位置1 的函数返回1，以此类推。但实际上，每个函数都返回10。因为每个函数的作用域链中都保存着createFunctions() 函数的活动对象， 所以它们引用的都是同一个变量i 。当createFunctions()函数返回后，变量i 的值是10，此时每个函数都引用着保存变量i 的同一个变量对象，所以在每个函数内部i 的值都是10。但是，我们可以通过创建另一个匿名函数强制让闭包的行为符合预期
+
+```javascript
+function createFunctions() {
+    var result = new Array();
+    for (var i = 0; i < 10; i++) {
+        result[i] = function (num) {
+            return function () {
+                return num;
+            };
+        }(i); //立即调用匿名函数，将外层包含函数的变量作为参数传递给匿名立即函数(即在每一个内部匿名函数的活动对象中保存了该参数值的变量num)，最后返回最内层匿名函数(访问num值的闭包)。
+    }
+    return result;
+}
+```
+
+#### this
+
+关于this的指向：
+
+1. 在一个函数执行环境中，this由函数调用者决定，由调用函数的方式来决定。如果被调用函数，被某一个对象所拥有，那么该函数在调用时，内部的this指向该对象。如果函数独立调用，那么该函数内部的this，则指向undefined。但是在非严格模式中，当this指向undefined时，它会被自动指向全局对象。
+
+2. 根据《JavaScript高级编程》书中的说法，执行函数时内置对象this和arguments都是保存在活动对象中的。如果活动求对象中的this默认为undefiend，在非严格模式下，会自动指向全局对象。
+
+```javascript
+var a = 20;
+var obj= {
+    a: 10,
+    getA: function () {
+        return this.a;
+    }
+}
+
+//通过对象调用
+obj.getA(); //10
+
+//独立调用
+var getA = obj.getA;
+getA(); //20
+```
+
+有时候由于编写闭包的方式不同，this的指向可能不会那么明显
+
+```javascript
+var name = "The Window";
+var object = {
+    name: "My Object",
+    getNameFunc: function () {
+        return function () {
+            return this.name;
+        };
+    }
+};
+alert(object.getNameFunc()()); //"The Window"（在非严格模式下）:通过对象调用外部函数获得内部匿名函数，然后立即调用，外部函数的this指向调用对象，内部函数的this为undefined.
+```
+
+这个例子返回的字符串是"The Window"，即全局name 变量的值。为什么匿名函数没有取得其包含作用域（或外部作用域）的this 对象呢？
+
+每个函数在被调用时都会自动取得两个特殊变量：this 和arguments。内部函数在搜索这两个变量时，只会搜索到其活动对象为止，因此永远不可能直接访问外部函数中的这两个变量。不过，把外部作用域中的this 对象保存在一个闭包能够访问到的变量里，就可以让闭包访问该对象了。
+
+```javascript
+var name = "The Window";
+var object = {
+    name: "My Object",
+    getNameFunc: function () {
+        var that = this;
+        return function () {
+            return that.name;
+        };
+    }
+};
+alert(object.getNameFunc()()); //"My Object"
+```
+
+>arguments也存在同样的问题。如果想访问作用域中的arguments 对象，必须将对该对象的引用保存到另一个闭包能够访问的变量中。
+
+在几种特殊情况下，this的指向
+
+```javascript
+var name = "The Window";
+var object = {
+    name: "My Object",
+    getName: function () {
+        return this.name;
+    }
+};
+
+object.getName(); //"My Object":普通调用
+(object.getName)(); //"My Object":等价于上面
+(object.getName = object.getName)(); //"The Window"，在非严格模式下：并非通过object.getName直接调用，而是通过赋值表达式返回的值调用。
+```
+
+#### 内存泄露
+
+由于IE9 之前的版本对JScript 对象和COM 对象使用不同的垃圾收集例程，因此闭包在IE 的这些版本中会导致一些特殊的问题。具体来说，如果闭包的作用域链中保存着一个HTML 元素，那么就意味着该元素将无法被销毁。
+
+```javascript
+function assignHandler() {
+    var element = document.getElementById("someElement");
+    element.onclick = function () {
+        alert(element.id);  //循环引用：外部变量对象引用该匿名函数，匿名函数又访问了该外部变量。
+    };
+}
+```
+
+以上代码创建了一个作为element 元素事件处理程序的闭包，而这个闭包则又创建了一个循环引用。**由于匿名函数保存了一个对assignHandler()的活动对象的引用(内部匿名函数的作用域会copy外部函数的作用域链)**，因此就会导致无法减少element 的引用数。只要匿名函数存在，element 的引用数至少也是1，因此它所占用的内存就永远不会被回收。可以通过改下代码解决
+
+```javascript
+function assignHandler() {
+    var element = document.getElementById("someElement");
+    var id = element.id;  //消除循环引用：内部匿名函数实际想访问的是元素的id，如果该id不是引用类型。那么可以直接创建变量复制该值，然后在匿名函数内部使用copy后的变量。
+    element.onclick = function () {
+        alert(id);
+    };
+    element = null;
+}
+```
+
+必须要记住：闭包会引用包含函数的整个活动对象，而其中包含着element。即使闭包不直接引用element，包含函数的活动对象中也仍然会保存一个引用。因此，有必要把element 变量设置为null。这样就能够解除对DOM 对象的引用，顺利地减少其引用数，确保正常回收其占用的内存。
+
+### 7.3 模仿块级作用域:立即调用式匿名函数
+
+JS里的作用域即执行环境只有全局执行环境和函数执行环境，没有块级执行环境。但我们可以利用函数表达式的特点来模仿。
+
+匿名函数可以用来模仿块级作用域：
+
+```javascript
+(function () {
+    //这里是块级作用域
+})();
+
+//下面代码会识别成一个函数声明，而函数声明不能在后边接括号来调用函数。
+// 要将函数声明转换成函数表达式，只需要在声明前后加上括号即可。
+function(){
+//这里是块级作用域
+}(); //ERROR！
+```
+
+>tip:使用匿名函数来创建局部作用域减少闭包占用的内存问题，因为没有指向匿名函数的引用。只要函数执行完毕，就可以立即销毁其作用域链了
+>
+>这种技术经常在全局作用域中被用在函数外部，从而限制向全局作用域中添加过多的变量和函数。一般来说，我们都应该尽量少向全局作用域中添加变量和函数。在一个由很多开发人员共同参与的大型应用程序中，过多的全局变量和函数很容易导致命名冲突。
+
+#### 访问私有变量(函数内变量)
+
+严格来讲，JavaScript 中没有私有成员的概念；所有对象属性都是公有的。不过，倒是有一个私有变量的概念。**任何在函数中定义的变量，都可以认为是私有变量，因为不能在函数的外部访问这些变量**。私有变量包括函数的参数、局部变量和在函数内部定义的其他函数。
+来看下面的例子：
+
+```javascript
+function add(num1, num2) {
+    var sum = num1 + num2;
+    return sum;
+}
+```
+
+在这个函数内部，有3 个私有变量：num1、num2 和sum。在函数内部可以访问这几个变量，但在函数外部则不能访问它们。**如果在这个函数内部创建一个闭包，那么闭包通过自己的作用域链也可以访问这些变量**。而利用这一点，就可以创建用于**访问私有变量的公有方法**。
+
+我们把有权访问私有变量和私有函数的公有方法称为**特权方法（privileged method）**。有两种在对象上创建特权方法的方式。
+
+第一种是在构造函数中定义特权方法，基本模式如下。
+
+```javascript
+function MyObject() {
+    //私有变量和私有函数：它们直接定义的，并没有使用this引用，使用new来创建实例时，也就不会添加到实例对象中。
+    var privateVariable = 10;
+
+    function privateFunction() {
+        return false;
+    }
+    //特权方法
+    this.publicMethod = function () {
+        privateVariable++;
+        return privateFunction();
+    };
+}
+```
+
+这个模式在构造函数内部定义了所有私有变量和函数。然后，又继续创建了能够访问这些私有成员的特权方法。能够在构造函数中定义特权方法，是因为特权方法作为闭包有权访问在构造函数中定义的所有变量和函数。对这个例子而言，变量privateVariable 和函数privateFunction()只能通过特权方法publicMethod()来访问。在创建MyObject 的实例后，除了使用publicMethod()这一个途径外，没有任何办法可以直接访问privateVariable 和privateFunction()。
+
+利用私有和特权成员，可以隐藏那些不应该被直接修改的数据，例如：
+
+```javascript
+function Person(name) {  //函数外不能访问name
+    this.getName = function () {  //定义函数来访问name，然后通过this添加到对象实例中，将函数暴露出去。
+        return name;
+    };
+    this.setName = function (value) {
+        name = value;
+    };
+}
+var person = new Person("Nicholas");
+alert(person.getName()); //"Nicholas"
+person.setName("Greg");
+alert(person.getName()); //"Greg"
+```
+
+>函数中定义特权方法也有一个缺点，那就是你必须使用构造函数模式来达到这个目的。构造函数模式的缺点是针对每个实例都会创建同样一组新方法，而使用静态私有变量来实现特权方法就可以避免这个问题。
+
+#### 静态私有变量
