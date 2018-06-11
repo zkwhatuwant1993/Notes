@@ -205,11 +205,11 @@ AOP能够使这些服务模块化，并以声明的方式将它们应用到它�
 Spring从两个角度来实现自动化装配：
 
 - 组件扫描（component scanning）：Spring会自动发现应用上下文中所创建的bean。
-- 自动装配（autowiring）：Spring自动满足bean之间的依赖(不用在代码里显示创建，由Spring注入)。
+- 自动装配（autowiring）：Spring自动满足bean之间的依赖(不用在代码里显示创建，由Spring注入)。
 
 #### 创建可被发现的bean(组件)
 
-步骤：
+步骤：
 
 1. 使用@Component注解声明组件
 2. 开启组件扫描(默认未启动)，启动的方式有两种。
@@ -246,7 +246,7 @@ tip:基础包是以String类型表示的，但这种方法是类型不安全（n
 - @Inject:Java DI规范
 
 1. 在构造器上添加注解
-2. 在修改器(如Setter方法：可以改变成员的值)上添加注解
+2. 在修改器(如Setter方法：可以改变成员的值)上添加注解
 
 - 不管是构造器、Setter方法还是其他的方法，Spring都会尝试满足**方法参数**上所声明的依赖。假如有且只有一个bean匹配依赖需求的话，那么这个bean将会被装配进来。
 - 如果没有匹配的bean，那么在应用上下文创建的时候，Spring会抛出一个异常。为了避免异常的出现，你可以将@Autowired的required属性设置为false
@@ -297,16 +297,16 @@ public class SampleConfig {
     */
     @Bean
     public TypeB typeB() {
-        return new TypeB(typeA()); //如果有多个bean需要注入A类bean实例，Spring将会拦截所有对它的调用，并确保直接返回该方法所创建的bean，而不是每次都对其进行实际的调用。即Spring的默认是单例的(可重用的)，如果如果该bean已经创建过，不再重新创建，直接使用。
+        return new TypeB(typeA()); //如果有多个bean需要注入A类bean实例，Spring将会拦截所有对它的调用，并确保直接返回该方法所创建的bean，而不是每次都对其进行实际的调用。即Spring的默认是单例的(可重用的)，如果如果该bean已经创建过，不再重新创建，直接使用。
     }
 
     /*
     方式二：理解起来更简单
-    当Spring调用typeB()方法来创建TypeB的bean时，Spring会自动装配一个TypeA的bean到方法中，然后执照合适的方式来使用它。
+    当Spring调用typeB()方法来创建TypeB的bean时，Spring会自动装配一个TypeA的bean到方法中，然后执照合适的方式来使用它。
     */
     @Bean
     public TypeB typeB(TypeA a) {
-        return new TypeB(a);
+        return new TypeB(a);
     }
 }
 ```
