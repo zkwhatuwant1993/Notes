@@ -205,7 +205,7 @@ AOP能够使这些服务模块化，并以声明的方式将它们应用到它�
 Spring从两个角度来实现自动化装配：
 
 - 组件扫描（component scanning）：Spring会自动发现应用上下文中所创建的bean。
-- 自动装配（autowiring）：Spring自动满足bean之间的依赖。
+- 自动装配（autowiring）：Spring自动满足bean之间的依赖(不用在代码里显示创建，由Spring注入)。
 
 #### 创建可被发现的bean(组件)
 
@@ -240,6 +240,77 @@ tip:基础包是以String类型表示的，但这种方法是类型不安全（n
 
 尽管在样例中，我为basePackageClasses设置的是组件类，但是你可以考虑在包中创建一个用来进行扫描的空标记接口（marker interface）。通过标记接口的方式，你依然能够保持对重构友好的接口引用，但是可以避免引用任何实际的应用程序代码（在稍后重构中，这些应用代码有可能会从想要扫描的包中移除掉）。
 
+#### 自动装配（Autowired）注解
+
+- @Autowired:Spring提供
+- @Inject:Java DI规范
+
+1. 在构造器上添加注解
+2. 在修改器(如Setter方法：可以改变成员的值)上添加注解
+
+- 不管是构造器、Setter方法还是其他的方法，Spring都会尝试满足**方法参数**上所声明的依赖。假如有且只有一个bean匹配依赖需求的话，那么这个bean将会被装配进来。
+- 如果没有匹配的bean，那么在应用上下文创建的时候，Spring会抛出一个异常。为了避免异常的出现，你可以将@Autowired的required属性设置为false
+- 将required属性设置为false时，Spring会尝试执行自动装配，但是如果没有匹配的bean的话，Spring将会让这个bean处于未装配的状态。但是，把required属性设置为false时，你需要谨慎对待。如果在你的代码中没有进行null检查的话，这个处于未装配状态的属性有可能会出现NullPointerException
+- 如果有多个bean都能满足依赖关系的话，Spring将会抛出一个异常，表明没有明确指定要选择哪个bean进行自动装配
+
 ### 2.3 通过Java代码装配bean
+
+尽管在很多场景下通过组件扫描和自动装配实现Spring的自动化配置是更为推荐的方式，但有时候自动化配置的方案行不通，因此需要明确配置Spring。比如说，你想要将第三方库中的组件装配到你的应用中，在这种情况下，是没有办法在它的类上添加@Component和@Autowired注解的，因此就不能使用自动化装配的方案了。
+
+#### 在Java创建Config配置类:@Configuration
+
+@Configuration注解表明这个类是一个配置类，该类应该包含在Spring应用上下文中如何创建bean的细节。
+
+#### 声明简单的bean:@Bean
+
+要在JavaConfig中声明bean，我们需要编写一个方法，这个方法会创建所需类型的实例，然后给这个方法添加@Bean注解。
+
+```java
+@Configuration
+public class SampleConfig {
+
+    /*
+    @Bean注解会告诉Spring这个方法将会返回一个对象，该对象要注册为Spring应用上下文中的bean。
+    默认情况bean的id就是该方法的名称，可以通过注解的name显式指定名称
+    */
+    @Bean(name="typeName")
+    public Type type() {
+        return new Type();
+    }
+}
+```
+
+#### 注入bean
+
+```java
+@Configuration
+public class SampleConfig {
+
+    @Bean
+    public TypeA typeA() {
+        return new TypeA();
+    }
+
+    /*
+    方式一：
+    将A类的Bean实例注入到生成的B类的bean实例中。
+    */
+    @Bean
+    public TypeB typeB() {
+        return new TypeB(typeA()); //如果有多个bean需要注入A类bean实例，Spring将会拦截所有对它的调用，并确保直接返回该方法所创建的bean，而不是每次都对其进行实际的调用。即Spring的默认是单例的(可重用的)，如果如果该bean已经创建过，不再重新创建，直接使用。
+    }
+
+    /*
+    方式二：理解起来更简单
+    当Spring调用typeB()方法来创建TypeB的bean时，Spring会自动装配一个TypeA的bean到方法中，然后执照合适的方式来使用它。
+    */
+    @Bean
+    public TypeB typeB(TypeA a) {
+        return new TypeB(a);
+    }
+}
+```
+
+>通过方式二引用其他的bean通常是最佳的选择，因为它不会要求将TypeA声明到同一个配置类之中。在这里甚至没有要求TypeA必须要在JavaConfig中声明，实际上它可以通过组件扫描功能自动发现或者通过XML来进行配置。你可以将配置分散到多个配置类、XML文件以及自动扫描和装配bean之中，只要功能完整健全即可。不管TypeA是采用什么方式创建出来的，Spring都会将其传入到配置方法中，并用来创建TypeA的bean
 
 ### 2.4 通过xml配置装备bean
