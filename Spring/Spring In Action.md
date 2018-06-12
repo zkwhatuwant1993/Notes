@@ -198,7 +198,7 @@ AOP能够使这些服务模块化，并以声明的方式将它们应用到它�
 - 在Java中进行显式配置。
 - 隐式的bean发现机制和自动装配。
 
-这三种方案可以单独使用，也可以结合使用。建议尽可能地使用自动配置的机制。显式配置越少越好。当你必须要显式配置bean的时候（比如，有些源码不是由你来维护的，而当你需要为这些代码配置bean的时候），我推荐使用类型安全并且比XML更加强大的JavaConfig。最后，只有当你想要使用便利的XML命名空间，并且在JavaConfig中没有同样的实现时，才应该使用XML。
+这三种方案可以单独使用，也可以结合使用。建议尽可能地使用自动配置的机制。显式配置越少越好。当你必须要显式配置bean的时候（比如，有些源码不是由你来维护的，而当你需要为这些代码配置bean的时候），我推荐使用类型安全并且比XML更加强大的JavaConfig(类型安全并且易于重构)。最后，只有当你想要使用便利的XML命名空间，并且在JavaConfig中没有同样的实现时，才应该使用XML。
 
 ### 2.2 自动化装配bean
 
@@ -314,3 +314,149 @@ public class SampleConfig {
 >通过方式二引用其他的bean通常是最佳的选择，因为它不会要求将TypeA声明到同一个配置类之中。在这里甚至没有要求TypeA必须要在JavaConfig中声明，实际上它可以通过组件扫描功能自动发现或者通过XML来进行配置。你可以将配置分散到多个配置类、XML文件以及自动扫描和装配bean之中，只要功能完整健全即可。不管TypeA是采用什么方式创建出来的，Spring都会将其传入到配置方法中，并用来创建TypeA的bean
 
 ### 2.4 通过xml配置装备bean
+
+#### 创建xml文件
+
+#### bean声明：\<bean>标签
+
+```xml
+<!-- 如果没有明确给定ID，这个bean将会根据全限定类名来进行命名。默认情况下bean的ID将会是“类名#0”。其中，“#0”是一个计数的形式，用来区分相同类型的其他bean（0、1、2...递增）。-->
+<bean class="com.zk.Type" id="type" />
+```
+
+当Spring发现这个\<bean>元素时，它将会调用class所指定类型的默认构造器来创建bean。
+
+#### 借助构造器注入初始化bean
+
+- \<constructor-arg>元素
+- 使用Spring 3.0所引入的c-命名空间
+
+两者的区别在很大程度就是是否冗长烦琐。可以看到，constructor-arg元素比使用c-命名空间会更加冗长，从而导致XML更加难以读懂。另外，有些事情constructor-arg可以做到，但是使用c-命名空间却无法实现。
+
+```xml
+<bean class="com.zk.Type" id="type">
+    <constructor-arg ref="bean_id" /> //注入构造函数的bean的名称(id)
+</bean>
+
+<bean class="com.zk.Type" id="type">
+    <c:xx-ref="bean_id" /> //形式一：为构造函数参数名为xx的参数注入bean
+    <c:_0-ref="bean_id" /> //形式二：为构造函数第一个参数（索引从0开始）注入bean
+</bean>
+```
+
+1. 注入字面量：value属性
+2. 注入集合：子标签list和set等。可以使用Spring的util命名空间来简化集合注入的配置。
+
+#### 属性注入：property标签
+
+- property标签
+- p命名空间
+
+该选择构造器注入还是属性注入呢？作为一个通用的规则，倾向于对强依赖使用构造器注入，而对可选性的依赖使用属性注入。
+
+### 导入混合配置
+
+不管使用JavaConfig还是使用XML进行装配，我通常都会创建一个根配置（root configuration），如果某个配置类或文件变得笨重、繁杂，那么将相关配置独立生成新的配置，再根配置中引入它们。
+
+#### 在JavaConfig中引用XML配置
+
+- @Import注解：导入java配置
+- @ImportResource注解：导入xml配置
+
+#### 在xml中引用JavaConfig
+
+- import元素：引入xml配置
+- bean元素：引用java配置
+
+## 三、高级装配
+
+### 3.1 环境与profile:Spring profile
+
+在开发软件的时候，有一个很大的挑战就是将应用程序从一个环境迁移到另外一个环境。开发阶段中，某些环境相关做法可能并不适合迁移到生产环境中，甚至即便迁移过去也无法正常工作。数据库配置、加密算法以及与外部系统的集成是跨环境部署时会发生变化的几个典型例子。（即针对每个环境对同一类型的Bean的生成策略不同）
+
+其中一种方式就是在单独的配置类（或XML文件）中配置每个bean，然后在构建阶段（可能会使用Maven的profiles）确定要将哪一个配置编译到可部署的应用中。这种方式的问题在于要为每种环境重新构建应用。当从开发阶段迁移到QA阶段时，重新构建也许算不上什么大问题。但是，从QA阶段迁移到生产阶段时，重新构建可能会引入bug并且会在QA团队的成员中带来不安的情绪。
+
+#### 配置profile bean
+
+Spring为环境相关的bean所提供的解决方案其实与构建时的方案没有太大的差别。当然，在这个过程中需要根据环境决定该创建哪个bean和不创建哪个bean。不过Spring并不是在构建的时候做出这样的决策，而是等到运行时再来确定。这样的结果就是同一个部署单元（可能会是WAR文件）能够适用于所有的环境，没有必要进行重新构建。
+
+1. 在java中配置profile
+
+    - 类注解:@Profile（Spring 3.1增加）
+    - 方法注解:@Profile(Spring 3.2增加)
+
+    类注解：在3.1版本中，Spring引入了bean profile的功能。要使用profile，你首先要将所有不同的bean定义整理到一个或多个profile之中，在将应用部署到每个环境时，要确保对应的profile处于激活（active）的状态。
+
+    ```java
+    /*@Profile注解应用在了类级别上。它会告诉Spring这个配置类中的bean只有在dev profile激活时才会创建。如果dev profile没有激活的话，那么带有@Bean注解的方法都会被忽略掉。
+    */
+    // 开发环境配置
+    @Configuration
+    @Profile("Dev")
+    public class DevelopmentProfileConfig {
+
+        @Bean(destroyMethod="shutdown")
+        public Bean getBean() {
+            return new DevelopmentBean();
+        }
+    }
+    ```
+
+    ```java
+    // 生产环境配置
+    @Configuration
+    @Profile("Prod")
+    public class ProductionProfileConfig {
+
+        public Bean getBean() {
+            return new ProductionBean();
+        }
+    }
+    ```
+
+    方法注解：
+
+    ```java
+    @Configuration
+    public class BeanProfileConfig {
+
+        @Bean
+        @Profile("Dev")
+        public Bean devBean() {
+            return new DevelopmentBean();
+        }
+
+        @Bean
+        @Profile("Prod")
+        public Bean prodBean() {
+            return new ProductionBean();
+        }
+    }
+    ```
+
+    这里有个问题需要注意，尽管每个bean都被声明在一个profile中，并且只有当规定的profile激活时，相应的bean才会被创建，但是可能会有其他的bean并没有声明在一个给定的profile范围内。没有指定profile的bean始终都会被创建，与激活哪个profile没有关系。
+
+2. 在xml中配置profile:在xml配置文件beans元素中设置属性profile
+
+   所有的配置文件都会放到部署单元之中（如WAR文件），但是只有profile属性与当前激活profile相匹配的配置文件才会被用到。
+
+   你还可以在根beans元素中嵌套定义beans元素（实际效果和单独定义配置是一样的），而不是为每个环境都创建一个profileXML文件。这能够将所有的profile bean定义放到同一个XML文件中
+
+#### 激活profile
+
+Spring在确定哪个profile处于激活状态时，需要依赖两个独立的属性：spring.profiles.active和spring.profiles.default。如果设置了spring.profiles.active属性的话，那么它的值就会用来确定哪个profile是激活的。但如果没有设置spring.profiles.active属性的话，那Spring将会查找spring.profiles.default的值。(没有配置profile的bean总会被创建)
+
+有多种方式来设置这两个属性：
+
+- 作为DispatcherServlet的初始化参数；
+- 作为Web应用的上下文参数(在web.xml中设置)；
+- 作为JNDI条目；
+- 作为环境变量；
+- 作为JVM的系统属性；
+- 在集成测试类上，使用@ActiveProfiles注解设置
+
+我所喜欢的一种方式是使用DispatcherServlet的参数将spring.profiles.default设置为开发环境的profile，我会在Servlet上下文中进行设置（为了兼顾到ContextLoaderListener）。例如，在Web应用中，设置spring.profiles.default.
+
+按照这种方式设置spring.profiles.default，所有的开发人员都能从版本控制软件中获得应用程序源码，并使用开发环境的设置（如嵌入式数据库）运行代码，而不需要任何额外的配置。
+
+当应用程序部署到QA、生产或其他环境之中时，负责部署的人根据情况使用系统属性、环境变量或JNDI设置spring.profiles.active即可。当设置spring.profiles.active以后，至于spring.profiles.default置成什么值就已经无所谓了；系统会优先使用spring.profiles.active中所设置的profile。
