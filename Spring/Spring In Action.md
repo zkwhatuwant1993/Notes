@@ -460,3 +460,195 @@ Spring在确定哪个profile处于激活状态时，需要依赖两个独立的�
 按照这种方式设置spring.profiles.default，所有的开发人员都能从版本控制软件中获得应用程序源码，并使用开发环境的设置（如嵌入式数据库）运行代码，而不需要任何额外的配置。
 
 当应用程序部署到QA、生产或其他环境之中时，负责部署的人根据情况使用系统属性、环境变量或JNDI设置spring.profiles.active即可。当设置spring.profiles.active以后，至于spring.profiles.default置成什么值就已经无所谓了；系统会优先使用spring.profiles.active中所设置的profile。
+
+### 3.2 条件化地配置bean
+
+1. Conditional接口
+    @Conditional注解（Spring4引入）：它可以用到带有@Bean注解的方法上。如果给定的条件计算结果为true，就会创建这个bean，否则的话，这个bean会被忽略
+
+    ```java
+    @Configration
+    public class MyConfig {
+
+        @Bean
+        @Conditional(FooCondition.class)
+        public Type type() {
+            return new Type();
+        }
+    }
+    ```
+
+2. Conditional接口
+
+    Conditional注解接收一个Condition接口的实现。Condition接口定义了一个matchs方法，当此方法返回true时表示这个bean可以被创建。
+
+    ```java
+    public interface Condition {
+        boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata);
+    }
+    ```
+
+3. matches方法参数
+
+    ConditionContext接口：
+
+    - 借助getRegistry()返回的BeanDefinitionRegistry检查bean定义；
+    - 借助getBeanFactory()返回的ConfigurableListableBeanFactory检查bean是否存在，甚至探查bean的属性；
+    - 借助getEnvironment()返回的Environment检查环境变量是否存在以及它的值是什么；
+    - 读取并探查getResourceLoader()返回的ResourceLoader所加载的资源；
+    - 借助getClassLoader()返回的ClassLoader加载并检查类是否存在。
+
+    AnnotatedTypeMetadata接口：能够让我们检查带有@Bean注解的方法上还有什么其他的注解。
+
+> 非常有意思的是，从Spring 4开始，@Profile注解进行了重构，使其基于@Conditional和Condition实现.@Profile本身也使用了@Conditional注解，并且引用ProfileCondition作为Condition实现,并且在做出决策的过程中，考虑到了ConditionContext和AnnotatedTypeMetadata中的多个因素
+
+### 3.3　处理自动装配的歧义性
+
+当有多个bean满足自动装配所需的bean时，Spring会抛出NoUniqueBeanDefinitionException。
+
+#### 标识首选(primary)bean
+
+- java中配置：@Primary注解，用于@Component标识的类或@Bean标识的方法
+- xml: bean元素中的属性primary
+
+#### 使用限定符：@Qualifier
+
+设置首选bean的局限性在于@Primary无法将可选方案的范围限定到唯一一个无歧义性的选项中。它只能标示一个优先的可选方案。当首选bean的数量超过一个时，我们并没有其他的方法进一步缩小可选范围。
+
+与之相反，Spring的限定符能够在所有可选的bean上进行缩小范围的操作，最终能够达到只有一个bean满足所规定的限制条件。
+
+1. @Qualifier注解的基本用法
+
+    - 用于@Component标注的类或者@Bean标识的方法所要创建的bean。标注参数为字符串，表示该bean的限定字符串。**不用@Qualifier标注的bean的默认限定符为该bean的ID**
+    - 用于@Autowired和@Inject标注的成员和方法（需要自动装配bean的地方）：限定注入的bean，查找自动装配时所标注的限定符与bean配置时所标注的@Component及所有自定义的限定符完全匹配的bean，并注入。
+
+2. 使用自定义限定符注解
+
+    因为Java不允许在同一个条目上重复出现相同类型的多个注解。当多个bean具有相同的限定符的限定时，不能使用多个@Qualifier注解加上不同的限定符字符串来标注bean。为了进一步区分唯一要装配的bean，需要使用自定义限定符注解。
+
+    所需要做的就是创建一个注解，它本身要使用@Qualifier注解来标注。这样我们将不再使用@Qualifier("Feature")，而是使用自定义的@Feature注解。然后我们就能根据需求使用多个不同的自定义限定符注解来标注bean来区分他们。
+
+    自定义限定符注解：
+
+    ```java
+    @Target(xxx)
+    @Rentention(RententionPolicy.RUNTIME)
+    @Qualifier
+    public @interface BeanFeature1 {}
+
+     @Target(xxx)
+    @Rentention(RententionPolicy.RUNTIME)
+    @Qualifier
+    public @interface BeanFeature2 {}
+
+     @Target(xxx)
+    @Rentention(RententionPolicy.RUNTIME)
+    @Qualifier
+    public @interface BeanFeature3 {}
+
+    ```
+
+    使用限定符注解：
+
+    ```java
+    @Component
+    @BeanFeature1
+    @BeanFeature2
+    public class TypeA implements MyInterface {};
+
+    @Component
+    @BeanFeature1
+    @BeanFeature3
+    public class TypeB implements MyInterface {};
+    ```
+
+### 3.4 bean的作用域
+
+- java中配置：@Scope
+- xml中配置：scope属性
+
+在默认情况下，Spring应用上下文中所有bean都是作为以单例（singleton）的形式创建的。也就是说，不管给定的一个bean被注入到其他bean多少次，每次所注入的都是同一个实例。在大多数情况下，单例bean是很理想的方案。初始化和垃圾回收对象实例所带来的成本只留给一些小规模任务，在这些任务中，让对象保持无状态并且在应用中反复重用这些对象可能并不合理。
+
+有时候，可能会发现，你所使用的类是易变的（mutable），它们会保持一些状态，因此重用是不安全的。在这种情况下，将class声明为单例的bean就不是什么好主意了，因为对象会被污染，稍后重用的时候会出现意想不到的问题。
+
+Spring定义了多种作用域，可以基于这些作用域创建bean，包括：
+
+- 单例（Singleton）：在整个应用中，只创建bean的一个实例。
+- 原型（Prototype）：每次注入或者通过Spring应用上下文获取的时候，都会创建一个新的bean实例。
+- 会话（Session）：在Web应用中，为每个会话创建一个bean实例。
+- 请求（Rquest）：在Web应用中，为每个请求创建一个bean实例。
+
+#### 使用会话和请示作用域
+
+在Web应用中，如果能够实例化在会话和请求范围内共享的bean，那将是非常有价值的事情。例如，在典型的电子商务应用中，可能会有一个bean代表用户的购物车。如果购物车是单例的话，那么将会导致所有的用户都会向同一个购物车中添加商品。另一方面，如果购物车是原型作用域的，那么在应用中某一个地方往购物车中添加商品，在应用的另外一个地方可能就不可用了，因为在这里注入的是另外一个原型作用域的购物车
+
+就购物车bean来说，会话作用域是最为合适的，因为它与给定的用户关联性最大。
+
+```java
+@Component
+@Scope(
+    value=WebApplicationContext.SOCPE_SESSION,
+    proxyMode=ScopedProxyMode.INTERFACES)
+public class ShoppingCart {}
+```
+
+@Scope有一个proxyMode属性，这个属性解决了将会话或请求作用域的bean注入到单例bean中所遇到的问题.下面是问题场景。
+
+    假设我们要将ShoppingCart bean注入到单例StoreService bean的Setter方法
+
+    因为StoreService是一个单例的bean，会在Spring应用上下文加载的时候创建。当它创建的时候，Spring会试图将ShoppingCart bean注入到 setShoppingCart()方法中。但是ShoppingCart bean是会话作用域的，此时并不存在。直到某个用户进入系统，创建了会话之后，才会出现ShoppingCart实例。
+
+    另外，系统中将会有多个ShoppingCart实例：每个用户一个。我们并不想让Spring注入某个固定的ShoppingCart实例到StoreService中。我们希望的是当StoreService处理购物车功能时，它所使用的ShoppingCart实例恰好是当前会话所对应的那一个。
+
+    Spring并不会将实际的ShoppingCart bean注入到StoreService中，Spring会注入一个到ShoppingCart bean的代理.这个代理会暴露与ShoppingCart相同的方法，所以StoreService会认为它就是一个购物车。但是，当StoreService调用ShoppingCart的方法时，代理会对其进行懒解析并将调用委托给会话作用域内真正的ShoppingCart bean。
+
+现在，我们带着对这个作用域的理解，讨论一下proxyMode属性。如配置所示，proxyMode属性被设置成了ScopedProxyMode.INTERFACES，这表明这个代理要实现ShoppingCart接口，并将调用委托给实现bean。
+
+如果ShoppingCart是接口而不是类的话，这是可以的（也是最为理想的代理模式）。但如果sShoppingCart是一个具体的类的话，Spring就没有办法创建基于接口的代理了。此时，它必须使用CGLib来生成基于类的代理。所以，如果bean类型是具体类的话，我们必须要将proxyMode属性设置为ScopedProxyMode.TARGET_CLASS，以此来表明要以生成目标类扩展的方式创建代理。
+
+请求作用域同理。作用域代理能够延迟注入请求和会话作用域的bean
+
+#### 在XML中声明bean作用域：\<aop:scoped-proxy>
+
+默认情况下，它会使用CGLib创建目标类的代理。但是我们也可以将proxy-target-class属性设置为false，进而要求它生成基于接口的代理
+
+### 3.5 运行时注入值
+
+当讨论依赖注入的时候，我们通常所讨论的是将一个bean引用注入到另一个bean的属性或构造器参数中。它通常来讲指的是将一个对象与另一个对象进行关联。但是bean装配的另外一个方面指的是将一个值注入到bean的属性或者构造器参数中。
+
+有时候硬编码是可以的，但有的时候，我们可能会希望避免硬编码值，而是想让这些值在运行时再确定。
+
+Spring提供了两种在运行时求值的方式：这两种技术的用法是类似的，不过它们的目的和行为是有所差别的
+
+- 属性占位符（Property placeholder）。
+- Spring表达式语言（SpEL）。
+
+#### 属性占位符
+
+1. 使用@PropertySource注解和Environment接口
+2. 解析属性占位符：
+
+    Spring一直支持将属性定义到外部的属性的文件中，并使用占位符值将其插入到Spring bean中。在Spring装配中，占位符的形式为使用“${ ... }”包装的属性名称。
+
+    - xml:直接使用。
+    - 自动装配：结合@Value注解
+
+    为了使用占位符，我们必须要配置一个PropertyPlaceholderConfigurer bean或PropertySourcesPlaceholderConfigurer bean。从Spring 3.1开始，推荐使用PropertySourcesPlaceholderConfigurer，因为它能够基于Spring Environment及其属性源来解析占位符。
+
+    如果你想使用XML配置的话，Spring context命名空间中的\<context:propertyplaceholder>元素将会为你生成PropertySourcesPlaceholderConfigurer bean：
+
+解析外部属性能够将值的处理推迟到运行时，但是它的关注点在于根据名称解析来自于Spring Environment和属性源的属性。而Spring表达式语言提供了一种更通用的方式在运行时计算所要注入的值。
+
+#### 使用Spring表达式语言进行装配
+
+Spring 3引入了Spring表达式语言（Spring Expression Language，SpEL），它能够以一种强大和简洁的方式将值装配到bean属性和构造器参数中，在这个过程中所使用的表达式会在运行时计算得到值
+
+SpEL拥有很多特性，包括：
+
+- 使用bean的ID来引用bean；
+- 调用方法和访问对象的属性；
+- 对值进行算术、关系和逻辑运算；
+- 正则表达式匹配；
+- 集合操作。
+
+SpEL还能够用在依赖注入以外的其他地方。例如，Spring Security支持使用SpEL表达式定义安全限制规则。另外，如果你在Spring MVC应用中使用Thymeleaf模板作为视图的话，那么这些模板可以使用SpEL表达式引用模型数据。
