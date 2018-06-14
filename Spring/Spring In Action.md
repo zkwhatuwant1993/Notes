@@ -338,13 +338,18 @@ public class SampleConfig {
     <constructor-arg ref="bean_id" /> //注入构造函数的bean的名称(id)
 </bean>
 
+<!-- c标签做为子元素 -->
 <bean class="com.zk.Type" id="type">
     <c:xx-ref="bean_id" /> //形式一：为构造函数参数名为xx的参数注入bean
     <c:_0-ref="bean_id" /> //形式二：为构造函数第一个参数（索引从0开始）注入bean
 </bean>
+
+<!-- c标签做为属性，其中xx为参数名称 -->
+<bean class="com.zk.Type" id="type" c:xx="">
+</bean>
 ```
 
-1. 注入字面量：value属性
+1. 注入字面量：constructor-arg元素的value属性和c标签直接bean元素的属性
 2. 注入集合：子标签list和set等。可以使用Spring的util命名空间来简化集合注入的配置。
 
 #### 属性注入：property标签
@@ -471,7 +476,7 @@ Spring在确定哪个profile处于激活状态时，需要依赖两个独立的�
     public class MyConfig {
 
         @Bean
-        @Conditional(FooCondition.class)
+        @Conditional(FooCondition.class)
         public Type type() {
             return new Type();
         }
@@ -519,14 +524,16 @@ Spring在确定哪个profile处于激活状态时，需要依赖两个独立的�
 
 1. @Qualifier注解的基本用法
 
-    - 用于@Component标注的类或者@Bean标识的方法所要创建的bean。标注参数为字符串，表示该bean的限定字符串。**不用@Qualifier标注的bean的默认限定符为该bean的ID**
+    - 用于@Component标注的类或者@Bean标识的方法所要创建的bean。标注参数为字符串，表示该bean的限定字符串。**不用@Qualifier标注的bean的默认限定符为该bean的ID**
     - 用于@Autowired和@Inject标注的成员和方法（需要自动装配bean的地方）：限定注入的bean，查找自动装配时所标注的限定符与bean配置时所标注的@Component及所有自定义的限定符完全匹配的bean，并注入。
 
 2. 使用自定义限定符注解
 
     因为Java不允许在同一个条目上重复出现相同类型的多个注解。当多个bean具有相同的限定符的限定时，不能使用多个@Qualifier注解加上不同的限定符字符串来标注bean。为了进一步区分唯一要装配的bean，需要使用自定义限定符注解。
 
-    所需要做的就是创建一个注解，它本身要使用@Qualifier注解来标注。这样我们将不再使用@Qualifier("Feature")，而是使用自定义的@Feature注解。然后我们就能根据需求使用多个不同的自定义限定符注解来标注bean来区分他们。
+    >注：Java 8允许出现重复的注解，只要这个注解本身在定义的时候带有@Repeatable注解就可以。不过，Spring的@Qualifier注解并没有在定义时添加@Repeatable注解。
+
+    所需要做的就是创建一个注解，它本身要使用@Qualifier注解来标注。这样我们将不再使用@Qualifier("Feature")，而是使用自定义的@Feature注解。然后我们就能根据需求使用多个不同的自定义限定符注解来标注bean来区分他们。
 
     自定义限定符注解：
 
@@ -534,17 +541,17 @@ Spring在确定哪个profile处于激活状态时，需要依赖两个独立的�
     @Target(xxx)
     @Rentention(RententionPolicy.RUNTIME)
     @Qualifier
-    public @interface BeanFeature1 {}
+    public @interface BeanFeature1 {}
 
      @Target(xxx)
     @Rentention(RententionPolicy.RUNTIME)
     @Qualifier
-    public @interface BeanFeature2 {}
+    public @interface BeanFeature2 {}
 
      @Target(xxx)
     @Rentention(RententionPolicy.RUNTIME)
     @Qualifier
-    public @interface BeanFeature3 {}
+    public @interface BeanFeature3 {}
 
     ```
 
@@ -552,13 +559,13 @@ Spring在确定哪个profile处于激活状态时，需要依赖两个独立的�
 
     ```java
     @Component
-    @BeanFeature1
-    @BeanFeature2
+    @BeanFeature1
+    @BeanFeature2
     public class TypeA implements MyInterface {};
 
     @Component
-    @BeanFeature1
-    @BeanFeature3
+    @BeanFeature1
+    @BeanFeature3
     public class TypeB implements MyInterface {};
     ```
 
@@ -625,7 +632,7 @@ Spring提供了两种在运行时求值的方式：这两种技术的用法是�
 
 #### 属性占位符
 
-1. 使用@PropertySource注解和Environment接口
+1. 使用@PropertySource注解和Environment接口来检索属性
 2. 解析属性占位符：
 
     Spring一直支持将属性定义到外部的属性的文件中，并使用占位符值将其插入到Spring bean中。在Spring装配中，占位符的形式为使用“${ ... }”包装的属性名称。
@@ -652,3 +659,111 @@ SpEL拥有很多特性，包括：
 - 集合操作。
 
 SpEL还能够用在依赖注入以外的其他地方。例如，Spring Security支持使用SpEL表达式定义安全限制规则。另外，如果你在Spring MVC应用中使用Thymeleaf模板作为视图的话，那么这些模板可以使用SpEL表达式引用模型数据。
+
+但需要注意的是，不要让你的表达式太智能。你的表达式越智能，对它的测试就越重要。SpEL毕竟只是String类型的值，可能测试起来很困难。鉴于这一点，我建议尽可能让表达式保持简洁，这样测试不会是什么大问题。
+
+## 四、面向切面
+
+- 面向切面编程的基本原理
+- 通过POJO创建切面
+- 使用@AspectJ注解
+- 为AspectJ切面注入依赖
+
+在软件开发中，散布于应用中多处的功能被称为横切关注点（cross-cutting concern）。通常来讲，这些横切关注点从概念上是与应用的业务逻辑相分离的（但是往往会直接嵌入到应用的业务逻辑之中）。把这些横切关注点与业务逻辑相分离正是面向切面编程（AOP）所要解决的问题。
+
+DI有助于应用对象之间的解耦，而AOP可以实现横切关注点与它们所影响的对象之间的解耦。
+
+### 什么是面向切面编程
+
+切面提供了取代继承和委托的另一种可选方案，而且在很多场景下更清晰简洁。在使用面向切面编程时，我们仍然在一个地方定义通用功能，但是可以通过声明的方式定义这个功能要以何种方式在何处应用，而无需修改受影响的类。横切关注点可以被模块化为特殊的类，这些类被称为切面（aspect）。
+
+这样做有两个好处：首先，现在每个关注点都集中于一个地方，而不是分散到多处代码中；其次，服务模块更简洁，因为它们只包含主要关注点（或核心功能）的代码，而次要关注点的代码被转移到切面中了。
+
+#### AOP术语
+
+1. 通知(advice)
+
+    通知定义了切面的功能以及何时使用。
+
+    Spring切面可以应用5种类型的通知：
+
+    - 前置通知（Before）：在目标方法被调用之前调用通知功能；
+    - 后置通知（After）：在目标方法完成之后调用通知，此时不会关心方法的输出是什么；
+    - 返回通知（After-returning）：在目标方法成功执行之后调用通知；
+    - 异常通知（After-throwing）：在目标方法抛出异常后调用通知；
+    - 环绕通知（Around）：通知包裹了被通知的方法，在被通知的方法调用之前和调用之后执行
+    - 自定义的行为。
+
+2. 连接点(join point)
+
+    我们的应用可能也有数以千计的时机应用通知。这些时机被称为连接点。连接点是在应用执行过程中能够插入切面的一个点。这个点可以是调用方法时、抛出异常时、甚至修改一个字段时。切面代码可以利用这些点插入到应用的正常流程之中，并添加新的行为。
+
+3. 切点（Poincut）：特定的连接点的组合
+
+    一个切面并不需要通知应用的所有连接点。切点有助于缩小切面所通知的连接点的范围。
+
+    如果说通知定义了切面的“什么”和“何时”的话，那么切点就定义了“何处”。切点的定义会匹配通知所要织入的一个或多个连接点。我们通常使用明确的类和方法名称，或是利用正则表达式定义所匹配的类和方法名称来指定这些切点。有些AOP框架允许我们创建动态的切点，可以根据运行时的决策（比如方法的参数值）来决定是否应用通知。
+
+4. 切面（Aspect）
+
+    切面是通知和切点的结合。通知和切点共同定义了切面的全部内容——它是什么，在何时和何处完成其功能。
+
+5. 引入（Introduction）
+
+    引入允许我们向现有的类添加新方法或属性。例如，我们可以创建一个Auditable通知类，该类记录了对象最后一次修改时的状态。这很简单，只需一个方法，setLastModified(Date)，和一个实例变量来保存这个状态。然后，这个新方法和实例变量就可以被引入到现有的类中，从而可以在无需修改这些现有的类的情况下，让它们具有新的行为和状态。
+
+6. 织入（Weaving）
+
+    织入是把切面应用到目标对象并创建新的代理对象的过程。切面在指定的连接点被织入到目标对象中,在目标对象的生命周期里有多个点可以进行织入：
+
+    - 编译期：切面在目标类编译时被织入。这种方式需要特殊的编译器。AspectJ的织入编译器就是以这种方式织入切面的。
+    - 类加载期：切面在目标类加载到JVM时被织入。这种方式需要特殊的类加载器（ClassLoader），它可以在目标类被引入应用之前增强该目标类的字节码。AspectJ 5的加载时织入（load-time weaving，LTW）就支持以这种方式织入切面。
+    - 运行期：切面在应用运行的某个时刻被织入。一般情况下，在织入切面时，AOP容器会为目标对象动态地创建一个代理对象。Spring AOP就是以这种方式织入切面的。
+
+#### Spring对AOP的支持
+
+并不是所有的AOP框架都是相同的，它们在连接点模型上可能有强弱之分。有些允许在字段修饰符级别应用通知，而另一些只支持与方法调用相关的连接点。它们织入切面的方式和时机也有所不同。但是无论如何，创建切点来定义切面所织入的连接点是AOP框架的基本功能。
+
+Spring提供了4种类型的AOP支持：
+
+- 基于代理的经典(旧)Spring AOP；
+- 纯POJO切面:使用xml配置和aop命名空间
+- @AspectJ注解驱动的切面:使用注解
+- 注入式AspectJ切面（适用于Spring各版本）：需要拦截构造器或属性时
+
+前三种都是Spring AOP实现的变体，**Spring AOP构建在动态代理基础之上**，因此，Spring对AOP的支持局限于方法拦截。
+
+1. Spring通知是Java编写的
+
+    Spring所创建的通知都是用标准的Java类编写的。这样的话，我们就可以使用与普通Java开发一样的集成开发环境（IDE）来开发切面。而且，定义通知所应用的切点通常会使用注解或在Spring配置文件里采用XML来编写，这两种语法对于Java开发者来说都是相当熟悉的。AspectJ与之相反。虽然AspectJ现在支持基于注解的切面，但AspectJ最初是以Java语言扩展的方式实现的。这种方式有优点也有缺点。通过特有的AOP语言，我们可以获得更强大和细粒度的控制，以及更丰富的AOP工具集，但是我们需要额外学习新的工具和语法。
+
+2. Spring在运行时通知对象
+
+    通过在代理类中包裹切面，Spring在运行期把切面织入到Spring管理的bean中。代理类封装了目标类，并拦截被通知方法的调用，再把调用转发给真正的目标bean。当代理拦直到应用需要被代理的bean时，Spring才创建代理对象。例如使用的ApplicationContext的话，在ApplicationContext从BeanFactory中加载所有bean的时候，Spring才会创建被代理的对象。因为Spring运行时才创建代理对象，所以我们不需要特殊的编译器来织入Spring AOP的切面。
+
+#### 通过切点来选择连接点:切点表达式
+
+在Spring AOP中，要使用AspectJ的切点表达式语言来定义切点。关于Spring AOP的AspectJ切点，最重要的一点就是Spring仅支持AspectJ切点指示器（pointcut designator）的一个子集。让我们回顾下，Spring是基于代理的，而某些切点表达式是与基于代理
+的AOP无关的(也就是Spring不支持的)。
+
+#### 使用注解创建切面:@Aspect
+
+1. AspectJ提供了五个注解来定义通知：他们的参数都是**切点表达式**
+
+    - @After 通知方法会在目标方法返回或抛出异常后调用
+    - @AfterReturning 通知方法会在目标方法返回后调用
+    - @AfterThrowing 通知方法会在目标方法抛出异常后调用
+    - @Around 通知方法会将目标方法封装起来
+    - @Before 通知方法会在目标方法调用之前执行
+
+    ```java
+    // 定义业务类:如Performance
+    package com.zk;
+    public interface Perfomance {
+        public void perform();
+    }
+    ```
+
+2. 通过@Pointcut注解声明频繁使用的切点表达式
+
+需要注意的是，除了注解和没有实际操作的performance()方法，Audience类依然是一个POJO。我们能够像使用其他的Java类那样调用它的方法，它的方法也能够独立地进行单元测试，这与其他的Java类并没有什么区别。
