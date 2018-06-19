@@ -4,9 +4,9 @@ Sping是一个模块化框架，目的是简化Java EE应用程序开发(最初�
 
 本书涵盖了Spring框架的许多领域，既有核心框架，也有各种功能扩展，不少的同学曾经对我言及，感觉书中所讲述的内容深度不够，但是我个人认为，对于开源框架的学习，我们会有不同的掌握深度，从最初始的使用、配置，到设计原理，再到源码分析，一本书很难面面俱到深入介绍所有的内容，但是它却能够提供一个方向，让我们按图索骥深入学习更多的知识。
 
-## 一、 Spring Core
+## Spring Core：配置Spring容器和为Spring管理的对象应用切面
 
-## 1. Spring简介
+## 一. Spring简介
 
 在诞生之初，创建Spring的主要目的是用来替代更加重量级的企业级Java技术，尤其是EJB。相
 对于EJB来说，Spring提供了更加轻量级和简单的编程模型。它增强了简单老式Java对象（Plain
@@ -743,12 +743,12 @@ Spring提供了4种类型的AOP支持：
 
     直到应用需要被代理的bean时，Spring才创建代理对象。例如使用的ApplicationContext的话，在ApplicationContext从BeanFactory中加载所有bean的时候，Spring才会创建被代理的对象。因为Spring运行时才创建代理对象，所以我们不需要特殊的编译器来织入Spring AOP的切面。
 
-### 通过切点来选择连接点:切点表达式
+### Spring AOP:通过切点来选择连接点:切点表达式
 
 在Spring AOP中，要使用AspectJ的切点表达式语言来定义切点。关于Spring AOP的AspectJ切点，最重要的一点就是Spring仅支持AspectJ切点指示器（pointcut designator）的一个子集。让我们回顾下，Spring是基于代理的，而某些切点表达式是与基于代理
 的AOP无关的(也就是Spring不支持的)。
 
-### 使用注解创建切面:@Aspect
+### Spring AOP:使用注解创建切面:@Aspect
 
 1. AspectJ提供了五个注解来定义通知：他们的参数都是**切点表达式**
 
@@ -778,10 +778,79 @@ Spring提供了4种类型的AOP支持：
 
 #### advice中的参数：限制连接点的匹配(切入点)和访问被通知方法中的参数
 
+通过切点表达式声明。
+
 #### 注解引入新功能
 
-为被通知的对象引入全新的功能，不仅仅是原有的业务功能(方法)。实际上，利用被称为引入的AOP概念，切面可以为Spring bean添加新方法。代理拦截调用并委托给实现该方法的其他对象。
+为被通知的对象引入全新的功能，不仅仅是原有的业务功能(方法)。实际上，利用被称为引入的AOP概念，切面可以为Spring bean添加新方法。**代理拦截调用并委托给实现该方法的其他对象**。
 
 如果除了实现这些接口，代理也能暴露新接口的话，会怎么样呢？那样的话，切面所通知的bean看起来像是实现了新的接口，即便底层实现类并没有实现这些接口也无所谓。
 
+@DeclareParent:声明了此切面所通知的bean要在它的对象层次结构中拥有新的父类型（就是我们引入新功能所属的接口）。
+
+```java
+// 定义新功能接口
+public interface MyInterface {
+    void doSomething();
+
+// 提供实现
+public class DefaultImpl implements MyInterface {
+
+    public void doSomthing() {
+        // do some thing
+    }
+}
+
+//定义切面
+@AspectJ
+@Component
+public class MyInterfaceIntroducer {
+
+    @DeclareParent(value = "com.zk.aspect.Performance+",
+    defaultImpl = DefaultImpl.class)
+    public static MyInterface myInterface;
+}
+```
+
+@DeclareParents注解由三部分组成：
+
+- value属性指定了哪种类型的bean要引入该接口。在本例中，也就是所有实现Performance的类型。（标记符后面的加号表示是Performance的所有子类型，而不是Performance本身。）
+- defaultImpl属性指定了为引入功能提供实现的类。在这里，我们指定的是DefaultEncoreable提供实现。
+- @DeclareParents注解所标注的静态属性指明了要引入了接口。在这里，我们所引入的是Encoreable接口。
+
+Spring的自动代理机制将会获取到它的声明，当Spring发现一个bean使用了@Aspect注解时，Spring就会创建一个代理，然后将调用委托给被代理的bean或被引入的实现，这取决于调用的方法属于被代理的bean还是属于被引入的接口。
+
+调用流程：bean自动注入(实际上是拥有bean的所有接口的代理对象) -> 将bean(代理对象)强转为新功能接口类型(spring创建的代理对象也实现了该接口) -> 调用新功能 -> 代理对象拦截调用并转到内部的bean对象或者接口的实现的引入。
+
 在Spring中，注解和自动代理提供了一种很便利的方式来创建切面。它非常简单，并且只涉及到最少的Spring配置。**但是，面向注解的切面声明有一个明显的劣势：你必须能够为通知类添加注解。为了做到这一点，必须要有源码**。
+
+### 在xml中声明切面：Spring的aop命名空间
+
+使用原则：基于注解的配置要优于基于Java的配置，基于Java的配置要优于基于XML的配置。但是，如果你需要声明切面，但是又不能为通知类添加注解的时候，那么就必须转向XML配置了。
+
+关于Spring AOP配置元素，第一个需要注意的事项是大多数的AOP配置元素必须在\<aop:config>元素的上下文内使用。这条规则有几种例外场景，但是把bean声明为一个切面时，我们总是从\<aop:config>元素开始配置的。
+
+\<aop:pointcut>元素所定义的切点可以被同一个\<aop:aspect>元素之内的所有通知元素引用。如果想让定义的切点能够在多个切面使用，我们可以把\<aop:pointcut>元素放在\<aop:config>元素的范围内。
+
+### 注入到AspectJ切面
+
+虽然Spring AOP能够满足许多应用的切面需求，但是与AspectJ相比，Spring AOP 是一个功能比较弱的AOP解决方案。AspectJ提供了Spring AOP所不能支持的许多类型的切点。
+
+例如，当我们需要在创建对象时应用通知，构造器切点就非常方便。不像某些其他面向对象语言中的构造器，Java构造器不同于其他的正常方法。这使得Spring基于代理的AOP无法把通知应用于对象的创建过程。
+
+对于大部分功能来讲，AspectJ切面与Spring是相互独立的。虽然它们可以织入到任意的Java应用中，这也包括了Spring应用，但是在应用AspectJ切面时几乎不会涉及到Spring。
+
+但是精心设计且有意义的切面很可能依赖其他类来完成它们的工作。如果在执行通知时，切面依赖于一个或多个类，我们可以在切面内部实例化这些协作的对象。但更好的方式是，我们可以借助Spring的依赖注入把bean装配进AspectJ切面中。
+
+>需要注意的是，AspectJ切面根本不需要Spring就可以织入到我们的应用中。当需要使用Spring提供的自动注入功能时，必须将该AspectJ切面声明为Spring bean.
+
+```xml
+<!-- 将AspectJ切面声明为一个spring bean -->
+<bean class = "com.zk.MyAspect"
+    factory-method="aspectOf">
+</bean>
+```
+
+很大程度上，\<bean>的声明与我们在Spring中所看到的其他\<bean>配置并没有太多的区别，但是最大的不同在于使用了factory-method属性。通常情况下，Spring bean由Spring容器初始化，但是AspectJ切面是由AspectJ在运行期创建的。等到Spring要为MyAspect注入属性时，MyAspect已经被实例化了。
+
+因为Spring不能负责创建MyAspect，那就不能在 Spring中简单地把MyAspect声明为一个bean。相反，我们需要一种方式为Spring获得已经由AspectJ创建的MyAspect实例的句柄，从而可以注入。幸好，所有的AspectJ切面都提供了一个静态的aspectOf()方法，该方法返回切面的一个单例。所以为了获得切面的实例，我们必须使用factory-method来调用asepctOf()方法而不是调用MyAspect的构造器方法。
