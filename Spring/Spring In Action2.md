@@ -14,7 +14,7 @@ Spring的Web框架就是为了帮你解决这些关注点而设计的。Spring M
 
 下面，我们将使用Spring MVC注解来构建处理各种Web请求、参数和表单输入的控制器。
 
-### 1. Spring MVC基础
+### 5.1 Spring MVC基础
 
 Spring将网络请求在Spring MVC组件之间移动：DispatcherServlet、处理器、映射（handler mapping）、控制器以及视图解析器（view resolver）。
 
@@ -35,3 +35,34 @@ DispatcherServlet的任务是将请求发送给Spring MVC控制器（controller�
 控制器所做的最后一件事就是将模型数据打包，并且标示出用于渲染输出的视图名。它接下来会将请求连同模型和视图名发送回DispatcherServlet 。
 
 这样，控制器就不会与特定的视图相耦合，传递给DispatcherServlet的视图名并不直接表示某个特定的JSP。实际上，它甚至并不能确定视图就是JSP。相反，它仅仅传递了一个逻辑名称，这个名字将会用来查找产生结果的真正视图。DispatcherServlet将会使用视图解析器（view resolver） 来将逻辑视图名匹配为一个特定的视图实现，它可能是也可能不是JSP。既然DispatcherServlet已经知道由哪个视图渲染结果，那请求的任务基本上也就完成了。它的最后一站是视图的实现（可能是JSP） ，在这里它交付模型数据。请求的任务就完成了。视图将使用模型数据渲染输出，这个输出会通过响应对象传递给客户端（不会像听上去那样硬编码）。
+
+##### 配置DispatcherServlet
+
+1. java配置
+    继承并实现AbstractAnnotationConfigDispatcherServletInitializer，要求服务器必须支持Servlet3.0
+
+    当DispatcherServlet启动的时候，它会创建Spring应用上下文，并加载配置文件或配置类中所声明的bean。但是在Spring Web应用中，通常还会有另外一个应用上下文。另外的这个应用上下文是由ContextLoaderListener创建的。
+
+    我们希望DispatcherServlet加载包含Web组件的bean，如控制器、视图解析器以及处理器映射，而ContextLoaderListener要加载应用中的其他bean。这些bean通常是驱动应用后端的中间层和数据层组件。
+
+2. xml配置
+
+##### 启用mvc
+
+1. java:@EnableWebMvc
+
+2. xml: mvc:annotation-driven元素标签
+
+### 5.2 编写基本的控制器
+
+在Spring MVC中，控制器只是方法上添加了@RequestMapping注解的类，这个注解声明了它们所要处理的请求。
+
+#### 测试控制器
+
+从Spring 3.2开始，我们可以按照控制器的方式来测试Spring MVC中的控制器了，而不仅仅是作为POJO进行测试。Spring现在包含了一种mock Spring MVC并针对控制器执行HTTP请求的机制。这样的话，在测试控制器的时候，就没有必要再启动Web服务器和Web浏览器了。
+
+#### 定义类级别的请求处理
+
+拆分@RequestMapping，并将其路径映射部分放到类级别上
+
+路径现在被转移到类级别的@RequestMapping上，而HTTP方法依然映射在方法级别上。当控制器在类级别上添加@RequestMapping注解时，这个注解会应用到控制器的所有处理器方法上。处理器方法上的@RequestMapping注解会对类级别上的@RequestMapping的声明进行补充。
