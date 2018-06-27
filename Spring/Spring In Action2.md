@@ -45,6 +45,8 @@ DispatcherServlet的任务是将请求发送给Spring MVC控制器（controller�
 
     我们希望DispatcherServlet加载包含Web组件的bean，如控制器、视图解析器以及处理器映射，而ContextLoaderListener要加载应用中的其他bean。这些bean通常是驱动应用后端的中间层和数据层组件。
 
+    实际上，AbstractAnnotationConfigDispatcherServletInitializer会同时创建DispatcherServlet和ContextLoaderListener。GetServlet-ConfigClasses()方法返回的带有@Configuration注解的类将会用来定义DispatcherServlet应用上下文中的bean。getRootConfigClasses()方法返回的带有@Configuration注解的类将会用来配置ContextLoaderListener创建的应用上下文中的bean。
+
 2. xml配置
 
 ##### 启用mvc
@@ -66,3 +68,5 @@ DispatcherServlet的任务是将请求发送给Spring MVC控制器（controller�
 拆分@RequestMapping，并将其路径映射部分放到类级别上
 
 路径现在被转移到类级别的@RequestMapping上，而HTTP方法依然映射在方法级别上。当控制器在类级别上添加@RequestMapping注解时，这个注解会应用到控制器的所有处理器方法上。处理器方法上的@RequestMapping注解会对类级别上的@RequestMapping的声明进行补充。
+
+#### 传递数据中的模型到视图
