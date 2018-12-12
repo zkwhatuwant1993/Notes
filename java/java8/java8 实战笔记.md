@@ -45,6 +45,15 @@
                 - [7.2 由数组创建流:Arrays.stream()](#72-%E7%94%B1%E6%95%B0%E7%BB%84%E5%88%9B%E5%BB%BA%E6%B5%81arraysstream)
                 - [7.3 由文件生成流](#73-%E7%94%B1%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90%E6%B5%81)
                 - [7.4 由函数生成流：创建无界流](#74-%E7%94%B1%E5%87%BD%E6%95%B0%E7%94%9F%E6%88%90%E6%B5%81%E5%88%9B%E5%BB%BA%E6%97%A0%E7%95%8C%E6%B5%81)
+    - [四、 java8日期Api](#%E5%9B%9B-java8%E6%97%A5%E6%9C%9Fapi)
+        - [表示时间的类：](#%E8%A1%A8%E7%A4%BA%E6%97%B6%E9%97%B4%E7%9A%84%E7%B1%BB)
+        - [日期操作、解析、格式化](#%E6%97%A5%E6%9C%9F%E6%93%8D%E4%BD%9C%E8%A7%A3%E6%9E%90%E6%A0%BC%E5%BC%8F%E5%8C%96)
+            - [TemporalAdjuster(日期操作)和TemporalAdjusters(静态工厂)](#temporaladjuster%E6%97%A5%E6%9C%9F%E6%93%8D%E4%BD%9C%E5%92%8Ctemporaladjusters%E9%9D%99%E6%80%81%E5%B7%A5%E5%8E%82)
+            - [DateTimeFormatter：格式化](#datetimeformatter%E6%A0%BC%E5%BC%8F%E5%8C%96)
+                - [DateTimeFormatterBuilde:提供更复杂构建formatter的方式](#datetimeformatterbuilde%E6%8F%90%E4%BE%9B%E6%9B%B4%E5%A4%8D%E6%9D%82%E6%9E%84%E5%BB%BAformatter%E7%9A%84%E6%96%B9%E5%BC%8F)
+            - [处理不同的时区和历法](#%E5%A4%84%E7%90%86%E4%B8%8D%E5%90%8C%E7%9A%84%E6%97%B6%E5%8C%BA%E5%92%8C%E5%8E%86%E6%B3%95)
+                - [ZoneId代替TimeZone](#zoneid%E4%BB%A3%E6%9B%BFtimezone)
+                - [ZoneOffest](#zoneoffest)
 
 1. 主要内容
    - lambda表达式
@@ -498,3 +507,35 @@ java.nio.file.Files中的很多静态方法都会返回一个流。
 ##### 7.4 由函数生成流：创建无界流
 
 Stream API提供了两个静态方法来从函数生成流：Stream.iterate（有序）和Stream.generate（无序,有状态）。
+
+## 四、 java8日期Api
+
+熟悉这些类的实例化方式，和操作api，特别是要理解类和接口的体系，理解api设计架构。能够更好的帮助使用
+
+### 表示时间的类：
+
+- LocalDate、LocalTime、LocalDateTime：用于描述符合人类理解方式的api，日期/时间
+- Instant:用于建模时间上的某一点的单一大整型数。即
+- Duration、Period
+
+### 日期操作、解析、格式化
+
+#### TemporalAdjuster(日期操作)和TemporalAdjusters(静态工厂)
+
+#### DateTimeFormatter：格式化
+
+格式华日期为字符串，然后可以使用对应的日期静态方法解析成日期、时间
+
+```java
+LocalDate date1 = LocalDate.of(2014, 3, 18);
+String formattedDate = date1.format(formatter);
+LocalDate date2 = LocalDate.parse(formattedDate, formatter);
+```
+
+##### DateTimeFormatterBuilde:提供更复杂构建formatter的方式
+
+#### 处理不同的时区和历法
+
+##### ZoneId代替TimeZone
+
+##### ZoneOffest
