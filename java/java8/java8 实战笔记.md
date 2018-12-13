@@ -23,7 +23,7 @@
       - [1. 只能遍历(消费)一次](#1-%E5%8F%AA%E8%83%BD%E9%81%8D%E5%8E%86%E6%B6%88%E8%B4%B9%E4%B8%80%E6%AC%A1)
       - [2. 外部迭代与内部迭代](#2-%E5%A4%96%E9%83%A8%E8%BF%AD%E4%BB%A3%E4%B8%8E%E5%86%85%E9%83%A8%E8%BF%AD%E4%BB%A3)
     - [3. 流的操作（StreamOps:intermediate和terminal）](#3-%E6%B5%81%E7%9A%84%E6%93%8D%E4%BD%9Cstreamopsintermediate%E5%92%8Cterminal)
-      - [1. intermediate操作](#1-intermediate%E6%93%8D%E4%BD%9C)
+      - [1. intermediate操作：延迟性](#1-intermediate%E6%93%8D%E4%BD%9C%E5%BB%B6%E8%BF%9F%E6%80%A7)
       - [2. terminal操作](#2-terminal%E6%93%8D%E4%BD%9C)
       - [3. 使用流](#3-%E4%BD%BF%E7%94%A8%E6%B5%81)
     - [4. 使用流 （详见api doc）](#4-%E4%BD%BF%E7%94%A8%E6%B5%81-%E8%AF%A6%E8%A7%81api-doc)
@@ -50,11 +50,12 @@
       - [分组](#%E5%88%86%E7%BB%84)
       - [分区](#%E5%88%86%E5%8C%BA)
       - [Collector接口](#collector%E6%8E%A5%E5%8F%A3)
-    - [流的并行处理与性能](#%E6%B5%81%E7%9A%84%E5%B9%B6%E8%A1%8C%E5%A4%84%E7%90%86%E4%B8%8E%E6%80%A7%E8%83%BD)
+        - [自定义Collector：根据需求自定义，提升性能](#%E8%87%AA%E5%AE%9A%E4%B9%89collector%E6%A0%B9%E6%8D%AE%E9%9C%80%E6%B1%82%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8F%90%E5%8D%87%E6%80%A7%E8%83%BD)
+    - [流的并行处理与性能:内部使用ForkJoinPool框架](#%E6%B5%81%E7%9A%84%E5%B9%B6%E8%A1%8C%E5%A4%84%E7%90%86%E4%B8%8E%E6%80%A7%E8%83%BD%E5%86%85%E9%83%A8%E4%BD%BF%E7%94%A8forkjoinpool%E6%A1%86%E6%9E%B6)
       - [并发与并行在概念上的区别](#%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%B9%B6%E8%A1%8C%E5%9C%A8%E6%A6%82%E5%BF%B5%E4%B8%8A%E7%9A%84%E5%8C%BA%E5%88%AB)
       - [并行流：stream.paraller(),注意只是设置标志位](#%E5%B9%B6%E8%A1%8C%E6%B5%81streamparaller%E6%B3%A8%E6%84%8F%E5%8F%AA%E6%98%AF%E8%AE%BE%E7%BD%AE%E6%A0%87%E5%BF%97%E4%BD%8D)
         - [高效使用并行流](#%E9%AB%98%E6%95%88%E4%BD%BF%E7%94%A8%E5%B9%B6%E8%A1%8C%E6%B5%81)
-      - [分支/合并框架](#%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E6%A1%86%E6%9E%B6)
+      - [分支/合并框架：内部使用ForkJoinPool](#%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E6%A1%86%E6%9E%B6%E5%86%85%E9%83%A8%E4%BD%BF%E7%94%A8forkjoinpool)
         - [使用RecursiveTask](#%E4%BD%BF%E7%94%A8recursivetask)
         - [如何高效使用](#%E5%A6%82%E4%BD%95%E9%AB%98%E6%95%88%E4%BD%BF%E7%94%A8)
         - [工作窃取](#%E5%B7%A5%E4%BD%9C%E7%AA%83%E5%8F%96)
@@ -74,6 +75,19 @@
       - [用Optional取代null](#%E7%94%A8optional%E5%8F%96%E4%BB%A3null)
       - [CompletableFuture：组合式异步编程](#completablefuture%E7%BB%84%E5%90%88%E5%BC%8F%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B)
         - [Future接口](#future%E6%8E%A5%E5%8F%A3)
+        - [使用CompletableFuture 构建异步应用](#%E4%BD%BF%E7%94%A8completablefuture-%E6%9E%84%E5%BB%BA%E5%BC%82%E6%AD%A5%E5%BA%94%E7%94%A8)
+        - [使用自定义Executor执行completeableFuture](#%E4%BD%BF%E7%94%A8%E8%87%AA%E5%AE%9A%E4%B9%89executor%E6%89%A7%E8%A1%8Ccompleteablefuture)
+        - [将多个同步或者异步合成pipeline(流水线)](#%E5%B0%86%E5%A4%9A%E4%B8%AA%E5%90%8C%E6%AD%A5%E6%88%96%E8%80%85%E5%BC%82%E6%AD%A5%E5%90%88%E6%88%90pipeline%E6%B5%81%E6%B0%B4%E7%BA%BF)
+        - [响应CompletableFuture 的completion 事件:thenAccept](#%E5%93%8D%E5%BA%94completablefuture-%E7%9A%84completion-%E4%BA%8B%E4%BB%B6thenaccept)
+  - [四、 java8日期Api](#%E5%9B%9B-java8%E6%97%A5%E6%9C%9Fapi)
+    - [表示时间的类：](#%E8%A1%A8%E7%A4%BA%E6%97%B6%E9%97%B4%E7%9A%84%E7%B1%BB)
+    - [日期操作、解析、格式化](#%E6%97%A5%E6%9C%9F%E6%93%8D%E4%BD%9C%E8%A7%A3%E6%9E%90%E6%A0%BC%E5%BC%8F%E5%8C%96)
+      - [TemporalAdjuster(日期操作)和TemporalAdjusters(静态工厂)](#temporaladjuster%E6%97%A5%E6%9C%9F%E6%93%8D%E4%BD%9C%E5%92%8Ctemporaladjusters%E9%9D%99%E6%80%81%E5%B7%A5%E5%8E%82)
+      - [DateTimeFormatter：格式化](#datetimeformatter%E6%A0%BC%E5%BC%8F%E5%8C%96)
+        - [DateTimeFormatterBuilde:提供更复杂构建formatter的方式](#datetimeformatterbuilde%E6%8F%90%E4%BE%9B%E6%9B%B4%E5%A4%8D%E6%9D%82%E6%9E%84%E5%BB%BAformatter%E7%9A%84%E6%96%B9%E5%BC%8F)
+      - [处理不同的时区和历法](#%E5%A4%84%E7%90%86%E4%B8%8D%E5%90%8C%E7%9A%84%E6%97%B6%E5%8C%BA%E5%92%8C%E5%8E%86%E6%B3%95)
+        - [ZoneId代替TimeZone](#zoneid%E4%BB%A3%E6%9B%BFtimezone)
+        - [ZoneOffest](#zoneoffest)
 
 1. 主要内容
    - lambda表达式
@@ -734,3 +748,35 @@ Future接口在Java 5中被引入，设计初衷是对将来某个时刻会发�
 3. 连接不相关任务(后执行的任务不依赖当前任务的执行结果，两个并行执行，最后合并):thenCombine
 
 ##### 响应CompletableFuture 的completion 事件:thenAccept
+
+## 四、 java8日期Api
+
+熟悉这些类的实例化方式，和操作api，特别是要理解类和接口的体系，理解api设计架构。能够更好的帮助使用
+
+### 表示时间的类：
+
+- LocalDate、LocalTime、LocalDateTime：用于描述符合人类理解方式的api，日期/时间
+- Instant:用于建模时间上的某一点的单一大整型数。即
+- Duration、Period
+
+### 日期操作、解析、格式化
+
+#### TemporalAdjuster(日期操作)和TemporalAdjusters(静态工厂)
+
+#### DateTimeFormatter：格式化
+
+格式华日期为字符串，然后可以使用对应的日期静态方法解析成日期、时间
+
+```java
+LocalDate date1 = LocalDate.of(2014, 3, 18);
+String formattedDate = date1.format(formatter);
+LocalDate date2 = LocalDate.parse(formattedDate, formatter);
+```
+
+##### DateTimeFormatterBuilde:提供更复杂构建formatter的方式
+
+#### 处理不同的时区和历法
+
+##### ZoneId代替TimeZone
+
+##### ZoneOffest
