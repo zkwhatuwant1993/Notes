@@ -3,48 +3,77 @@
 ## 目录
 
 - [JAVA 8实战笔记](#java-8%E5%AE%9E%E6%88%98%E7%AC%94%E8%AE%B0)
-    - [目录](#%E7%9B%AE%E5%BD%95)
-    - [一、 lambda表达式:java中对函数式编程的支持](#%E4%B8%80-lambda%E8%A1%A8%E8%BE%BE%E5%BC%8Fjava%E4%B8%AD%E5%AF%B9%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%94%AF%E6%8C%81)
-        - [1. 基本概念](#1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5)
-            - [1.1 什么是函数式编程](#11-%E4%BB%80%E4%B9%88%E6%98%AF%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B)
-            - [1.2 lambda表达式是什么？](#12-lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%98%AF%E4%BB%80%E4%B9%88)
-            - [1.3 在java如何表示](#13-%E5%9C%A8java%E5%A6%82%E4%BD%95%E8%A1%A8%E7%A4%BA)
-        - [2. 函数式接口：只有一个抽象方法的接口](#2-%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3%E5%8F%AA%E6%9C%89%E4%B8%80%E4%B8%AA%E6%8A%BD%E8%B1%A1%E6%96%B9%E6%B3%95%E7%9A%84%E6%8E%A5%E5%8F%A3)
-        - [3. lambda表达式](#3-lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F)
-            - [3.1 类型检查、类型推断以及限制](#31-%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%AD%E4%BB%A5%E5%8F%8A%E9%99%90%E5%88%B6)
-            - [3.2 方法引用：lambda表达式的语法糖,即直接引用现有方法](#32-%E6%96%B9%E6%B3%95%E5%BC%95%E7%94%A8lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%9A%84%E8%AF%AD%E6%B3%95%E7%B3%96%E5%8D%B3%E7%9B%B4%E6%8E%A5%E5%BC%95%E7%94%A8%E7%8E%B0%E6%9C%89%E6%96%B9%E6%B3%95)
-            - [3.3 构造函数引用](#33-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%BC%95%E7%94%A8)
-            - [3.4 复合表达式(利用默认方法实现)](#34-%E5%A4%8D%E5%90%88%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%A9%E7%94%A8%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95%E5%AE%9E%E7%8E%B0)
-    - [二、默认方法](#%E4%BA%8C%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95)
-    - [三、流：函数式数据处理](#%E4%B8%89%E6%B5%81%E5%87%BD%E6%95%B0%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86)
-        - [1. 流的基本概念](#1-%E6%B5%81%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5)
-            - [1.1 流是什么](#11-%E6%B5%81%E6%98%AF%E4%BB%80%E4%B9%88)
-        - [2. 流与集合](#2-%E6%B5%81%E4%B8%8E%E9%9B%86%E5%90%88)
-            - [1. 只能遍历(消费)一次](#1-%E5%8F%AA%E8%83%BD%E9%81%8D%E5%8E%86%E6%B6%88%E8%B4%B9%E4%B8%80%E6%AC%A1)
-            - [2. 外部迭代与内部迭代](#2-%E5%A4%96%E9%83%A8%E8%BF%AD%E4%BB%A3%E4%B8%8E%E5%86%85%E9%83%A8%E8%BF%AD%E4%BB%A3)
-        - [3. 流的操作（StreamOps:intermediate和terminal）](#3-%E6%B5%81%E7%9A%84%E6%93%8D%E4%BD%9Cstreamopsintermediate%E5%92%8Cterminal)
-            - [1. intermediate操作](#1-intermediate%E6%93%8D%E4%BD%9C)
-            - [2. terminal操作](#2-terminal%E6%93%8D%E4%BD%9C)
-            - [3. 使用流](#3-%E4%BD%BF%E7%94%A8%E6%B5%81)
-        - [4. 使用流 （详见api doc）](#4-%E4%BD%BF%E7%94%A8%E6%B5%81-%E8%AF%A6%E8%A7%81api-doc)
-            - [4.1 筛选和切片](#41-%E7%AD%9B%E9%80%89%E5%92%8C%E5%88%87%E7%89%87)
-            - [2. 映射](#2-%E6%98%A0%E5%B0%84)
-                - [4.2.1 flatMap:流的扁平化映射(重要)](#421-flatmap%E6%B5%81%E7%9A%84%E6%89%81%E5%B9%B3%E5%8C%96%E6%98%A0%E5%B0%84%E9%87%8D%E8%A6%81)
-            - [4.3 查找和匹配(短路)](#43-%E6%9F%A5%E6%89%BE%E5%92%8C%E5%8C%B9%E9%85%8D%E7%9F%AD%E8%B7%AF)
-            - [5. reduce(归约)](#5-reduce%E5%BD%92%E7%BA%A6)
-                - [5.1 元素求和](#51-%E5%85%83%E7%B4%A0%E6%B1%82%E5%92%8C)
-                - [5.2 归约方法的优势与并行化](#52-%E5%BD%92%E7%BA%A6%E6%96%B9%E6%B3%95%E7%9A%84%E4%BC%98%E5%8A%BF%E4%B8%8E%E5%B9%B6%E8%A1%8C%E5%8C%96)
-            - [5.3 有状态和无状态](#53-%E6%9C%89%E7%8A%B6%E6%80%81%E5%92%8C%E6%97%A0%E7%8A%B6%E6%80%81)
-            - [6. 数值流](#6-%E6%95%B0%E5%80%BC%E6%B5%81)
-                - [6.1 映射到数值流](#61-%E6%98%A0%E5%B0%84%E5%88%B0%E6%95%B0%E5%80%BC%E6%B5%81)
-                - [6.2 转换回对象流](#62-%E8%BD%AC%E6%8D%A2%E5%9B%9E%E5%AF%B9%E8%B1%A1%E6%B5%81)
-                - [6.3 默认值OptionalInt](#63-%E9%BB%98%E8%AE%A4%E5%80%BCoptionalint)
-                - [6.4 生成数值范围的流](#64-%E7%94%9F%E6%88%90%E6%95%B0%E5%80%BC%E8%8C%83%E5%9B%B4%E7%9A%84%E6%B5%81)
-            - [7. 多数据源构建流](#7-%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E6%9E%84%E5%BB%BA%E6%B5%81)
-                - [7.1 由值创建流：stream.of()](#71-%E7%94%B1%E5%80%BC%E5%88%9B%E5%BB%BA%E6%B5%81streamof)
-                - [7.2 由数组创建流:Arrays.stream()](#72-%E7%94%B1%E6%95%B0%E7%BB%84%E5%88%9B%E5%BB%BA%E6%B5%81arraysstream)
-                - [7.3 由文件生成流](#73-%E7%94%B1%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90%E6%B5%81)
-                - [7.4 由函数生成流：创建无界流](#74-%E7%94%B1%E5%87%BD%E6%95%B0%E7%94%9F%E6%88%90%E6%B5%81%E5%88%9B%E5%BB%BA%E6%97%A0%E7%95%8C%E6%B5%81)
+  - [目录](#%E7%9B%AE%E5%BD%95)
+  - [一、 lambda表达式:java中对函数式编程的支持](#%E4%B8%80-lambda%E8%A1%A8%E8%BE%BE%E5%BC%8Fjava%E4%B8%AD%E5%AF%B9%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B%E7%9A%84%E6%94%AF%E6%8C%81)
+    - [1. 基本概念](#1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5)
+      - [1.1 什么是函数式编程](#11-%E4%BB%80%E4%B9%88%E6%98%AF%E5%87%BD%E6%95%B0%E5%BC%8F%E7%BC%96%E7%A8%8B)
+      - [1.2 lambda表达式是什么？](#12-lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%98%AF%E4%BB%80%E4%B9%88)
+      - [1.3 在java如何表示](#13-%E5%9C%A8java%E5%A6%82%E4%BD%95%E8%A1%A8%E7%A4%BA)
+    - [2. 函数式接口：只有一个抽象方法的接口](#2-%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3%E5%8F%AA%E6%9C%89%E4%B8%80%E4%B8%AA%E6%8A%BD%E8%B1%A1%E6%96%B9%E6%B3%95%E7%9A%84%E6%8E%A5%E5%8F%A3)
+    - [3. lambda表达式](#3-lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F)
+      - [3.1 类型检查、类型推断以及限制](#31-%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%9F%A5%E7%B1%BB%E5%9E%8B%E6%8E%A8%E6%96%AD%E4%BB%A5%E5%8F%8A%E9%99%90%E5%88%B6)
+      - [3.2 方法引用：lambda表达式的语法糖,即直接引用现有方法](#32-%E6%96%B9%E6%B3%95%E5%BC%95%E7%94%A8lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%9A%84%E8%AF%AD%E6%B3%95%E7%B3%96%E5%8D%B3%E7%9B%B4%E6%8E%A5%E5%BC%95%E7%94%A8%E7%8E%B0%E6%9C%89%E6%96%B9%E6%B3%95)
+      - [3.3 构造函数引用](#33-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%BC%95%E7%94%A8)
+      - [3.4 复合表达式(利用默认方法实现)](#34-%E5%A4%8D%E5%90%88%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%88%A9%E7%94%A8%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95%E5%AE%9E%E7%8E%B0)
+  - [二、默认方法](#%E4%BA%8C%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95)
+  - [三、流：函数式数据处理](#%E4%B8%89%E6%B5%81%E5%87%BD%E6%95%B0%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86)
+    - [1. 流的基本概念](#1-%E6%B5%81%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5)
+      - [1.1 流是什么](#11-%E6%B5%81%E6%98%AF%E4%BB%80%E4%B9%88)
+    - [2. 流与集合](#2-%E6%B5%81%E4%B8%8E%E9%9B%86%E5%90%88)
+      - [1. 只能遍历(消费)一次](#1-%E5%8F%AA%E8%83%BD%E9%81%8D%E5%8E%86%E6%B6%88%E8%B4%B9%E4%B8%80%E6%AC%A1)
+      - [2. 外部迭代与内部迭代](#2-%E5%A4%96%E9%83%A8%E8%BF%AD%E4%BB%A3%E4%B8%8E%E5%86%85%E9%83%A8%E8%BF%AD%E4%BB%A3)
+    - [3. 流的操作（StreamOps:intermediate和terminal）](#3-%E6%B5%81%E7%9A%84%E6%93%8D%E4%BD%9Cstreamopsintermediate%E5%92%8Cterminal)
+      - [1. intermediate操作](#1-intermediate%E6%93%8D%E4%BD%9C)
+      - [2. terminal操作](#2-terminal%E6%93%8D%E4%BD%9C)
+      - [3. 使用流](#3-%E4%BD%BF%E7%94%A8%E6%B5%81)
+    - [4. 使用流 （详见api doc）](#4-%E4%BD%BF%E7%94%A8%E6%B5%81-%E8%AF%A6%E8%A7%81api-doc)
+      - [4.1 筛选和切片](#41-%E7%AD%9B%E9%80%89%E5%92%8C%E5%88%87%E7%89%87)
+      - [2. 映射](#2-%E6%98%A0%E5%B0%84)
+        - [4.2.1 flatMap:流的扁平化映射(重要)](#421-flatmap%E6%B5%81%E7%9A%84%E6%89%81%E5%B9%B3%E5%8C%96%E6%98%A0%E5%B0%84%E9%87%8D%E8%A6%81)
+      - [4.3 查找和匹配(短路)](#43-%E6%9F%A5%E6%89%BE%E5%92%8C%E5%8C%B9%E9%85%8D%E7%9F%AD%E8%B7%AF)
+      - [5. reduce(归约)](#5-reduce%E5%BD%92%E7%BA%A6)
+        - [5.1 元素求和](#51-%E5%85%83%E7%B4%A0%E6%B1%82%E5%92%8C)
+        - [5.2 归约方法的优势与并行化](#52-%E5%BD%92%E7%BA%A6%E6%96%B9%E6%B3%95%E7%9A%84%E4%BC%98%E5%8A%BF%E4%B8%8E%E5%B9%B6%E8%A1%8C%E5%8C%96)
+      - [5.3 有状态和无状态](#53-%E6%9C%89%E7%8A%B6%E6%80%81%E5%92%8C%E6%97%A0%E7%8A%B6%E6%80%81)
+      - [6. 数值流](#6-%E6%95%B0%E5%80%BC%E6%B5%81)
+        - [6.1 映射到数值流](#61-%E6%98%A0%E5%B0%84%E5%88%B0%E6%95%B0%E5%80%BC%E6%B5%81)
+        - [6.2 转换回对象流](#62-%E8%BD%AC%E6%8D%A2%E5%9B%9E%E5%AF%B9%E8%B1%A1%E6%B5%81)
+        - [6.3 默认值OptionalInt](#63-%E9%BB%98%E8%AE%A4%E5%80%BCoptionalint)
+        - [6.4 生成数值范围的流](#64-%E7%94%9F%E6%88%90%E6%95%B0%E5%80%BC%E8%8C%83%E5%9B%B4%E7%9A%84%E6%B5%81)
+      - [7. 多数据源构建流](#7-%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E6%9E%84%E5%BB%BA%E6%B5%81)
+        - [7.1 由值创建流：stream.of()](#71-%E7%94%B1%E5%80%BC%E5%88%9B%E5%BB%BA%E6%B5%81streamof)
+        - [7.2 由数组创建流:Arrays.stream()](#72-%E7%94%B1%E6%95%B0%E7%BB%84%E5%88%9B%E5%BB%BA%E6%B5%81arraysstream)
+        - [7.3 由文件生成流](#73-%E7%94%B1%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90%E6%B5%81)
+        - [7.4 由函数生成流：创建无界流](#74-%E7%94%B1%E5%87%BD%E6%95%B0%E7%94%9F%E6%88%90%E6%B5%81%E5%88%9B%E5%BB%BA%E6%97%A0%E7%95%8C%E6%B5%81)
+    - [4. 用流收集数据：Collector和Collectors(Collector的工厂类)的使用](#4-%E7%94%A8%E6%B5%81%E6%94%B6%E9%9B%86%E6%95%B0%E6%8D%AEcollector%E5%92%8Ccollectorscollector%E7%9A%84%E5%B7%A5%E5%8E%82%E7%B1%BB%E7%9A%84%E4%BD%BF%E7%94%A8)
+      - [collect里进行归约操作和使用Stream.reduce方法的异同](#collect%E9%87%8C%E8%BF%9B%E8%A1%8C%E5%BD%92%E7%BA%A6%E6%93%8D%E4%BD%9C%E5%92%8C%E4%BD%BF%E7%94%A8streamreduce%E6%96%B9%E6%B3%95%E7%9A%84%E5%BC%82%E5%90%8C)
+      - [分组](#%E5%88%86%E7%BB%84)
+      - [分区](#%E5%88%86%E5%8C%BA)
+      - [Collector接口](#collector%E6%8E%A5%E5%8F%A3)
+    - [流的并行处理与性能](#%E6%B5%81%E7%9A%84%E5%B9%B6%E8%A1%8C%E5%A4%84%E7%90%86%E4%B8%8E%E6%80%A7%E8%83%BD)
+      - [并发与并行在概念上的区别](#%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%B9%B6%E8%A1%8C%E5%9C%A8%E6%A6%82%E5%BF%B5%E4%B8%8A%E7%9A%84%E5%8C%BA%E5%88%AB)
+      - [并行流：stream.paraller(),注意只是设置标志位](#%E5%B9%B6%E8%A1%8C%E6%B5%81streamparaller%E6%B3%A8%E6%84%8F%E5%8F%AA%E6%98%AF%E8%AE%BE%E7%BD%AE%E6%A0%87%E5%BF%97%E4%BD%8D)
+        - [高效使用并行流](#%E9%AB%98%E6%95%88%E4%BD%BF%E7%94%A8%E5%B9%B6%E8%A1%8C%E6%B5%81)
+      - [分支/合并框架](#%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E6%A1%86%E6%9E%B6)
+        - [使用RecursiveTask](#%E4%BD%BF%E7%94%A8recursivetask)
+        - [如何高效使用](#%E5%A6%82%E4%BD%95%E9%AB%98%E6%95%88%E4%BD%BF%E7%94%A8)
+        - [工作窃取](#%E5%B7%A5%E4%BD%9C%E7%AA%83%E5%8F%96)
+      - [Spliterator：定义了并行流如何拆分它要遍历的数据](#spliterator%E5%AE%9A%E4%B9%89%E4%BA%86%E5%B9%B6%E8%A1%8C%E6%B5%81%E5%A6%82%E4%BD%95%E6%8B%86%E5%88%86%E5%AE%83%E8%A6%81%E9%81%8D%E5%8E%86%E7%9A%84%E6%95%B0%E6%8D%AE)
+        - [拆分过程](#%E6%8B%86%E5%88%86%E8%BF%87%E7%A8%8B)
+        - [Spliterator的特性](#spliterator%E7%9A%84%E7%89%B9%E6%80%A7)
+    - [高效使用java8编程](#%E9%AB%98%E6%95%88%E4%BD%BF%E7%94%A8java8%E7%BC%96%E7%A8%8B)
+      - [重构、测试、调试](#%E9%87%8D%E6%9E%84%E6%B5%8B%E8%AF%95%E8%B0%83%E8%AF%95)
+        - [为改善可读性和灵活性重构代码](#%E4%B8%BA%E6%94%B9%E5%96%84%E5%8F%AF%E8%AF%BB%E6%80%A7%E5%92%8C%E7%81%B5%E6%B4%BB%E6%80%A7%E9%87%8D%E6%9E%84%E4%BB%A3%E7%A0%81)
+        - [使用Lambda 重构面向对象的设计模式的模板](#%E4%BD%BF%E7%94%A8lambda-%E9%87%8D%E6%9E%84%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%9A%84%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%A8%A1%E6%9D%BF)
+        - [测试lambada](#%E6%B5%8B%E8%AF%95lambada)
+        - [调试](#%E8%B0%83%E8%AF%95)
+      - [默认方法（非抽象方法：类似抽象类中的实例方法，所有子类都会继承该方法）](#%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95%E9%9D%9E%E6%8A%BD%E8%B1%A1%E6%96%B9%E6%B3%95%E7%B1%BB%E4%BC%BC%E6%8A%BD%E8%B1%A1%E7%B1%BB%E4%B8%AD%E7%9A%84%E5%AE%9E%E4%BE%8B%E6%96%B9%E6%B3%95%E6%89%80%E6%9C%89%E5%AD%90%E7%B1%BB%E9%83%BD%E4%BC%9A%E7%BB%A7%E6%89%BF%E8%AF%A5%E6%96%B9%E6%B3%95)
+        - [不断演进的api](#%E4%B8%8D%E6%96%AD%E6%BC%94%E8%BF%9B%E7%9A%84api)
+        - [默认方法的使用模式](#%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95%E7%9A%84%E4%BD%BF%E7%94%A8%E6%A8%A1%E5%BC%8F)
+        - [解决默认方法冲突（方法签名冲突）](#%E8%A7%A3%E5%86%B3%E9%BB%98%E8%AE%A4%E6%96%B9%E6%B3%95%E5%86%B2%E7%AA%81%E6%96%B9%E6%B3%95%E7%AD%BE%E5%90%8D%E5%86%B2%E7%AA%81)
+      - [用Optional取代null](#%E7%94%A8optional%E5%8F%96%E4%BB%A3null)
+      - [CompletableFuture：组合式异步编程](#completablefuture%E7%BB%84%E5%90%88%E5%BC%8F%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B)
+        - [Future接口](#future%E6%8E%A5%E5%8F%A3)
 
 1. 主要内容
    - lambda表达式
@@ -287,11 +316,11 @@ jdk doc说明:
 >
 >Terminal operations, such as Stream.forEach or IntStream.sum, may traverse the stream to produce a result or a side-effect. After the terminal operation is performed, the stream pipeline is considered consumed, and can no longer be used; if you need to traverse the same data source again, you must return to the data source to get a new stream. In almost all cases, terminal operations are eager, completing their traversal of the data source and processing of the pipeline before returning. Only the terminal operations **iterator()** and **spliterator()** are not; these are provided as an "escape hatch" to enable arbitrary client-controlled pipeline traversals in the event that the existing operations are not sufficient to the task.
 
-#### 1. intermediate操作
+#### 1. intermediate操作：延迟性
 
 诸如filter或sorted等中间操作会返回另一个流。这让多个操作可以连接起来形成一个查
 询。重要的是，除非流水线上触发一个终端操作，否则中间操作不会执行任何处理——它们很懒。
-这是因为中间操作一般都可以合并起来，在终端操作时一次性全部处理。
+这是因为中间操作一般都可以合并起来（延迟），在终端操作时一次性全部处理。
 
 ```java
 List<String> names =
@@ -498,3 +527,210 @@ java.nio.file.Files中的很多静态方法都会返回一个流。
 ##### 7.4 由函数生成流：创建无界流
 
 Stream API提供了两个静态方法来从函数生成流：Stream.iterate（有序）和Stream.generate（无序,有状态）。
+
+### 4. 用流收集数据：Collector和Collectors(Collector的工厂类)的使用
+
+注意：所有这种形式的归约过程（即Collectors api提供的接口），其实都是Collectors.reducing工厂方法提供的更广义归约收集器的特殊情况。
+
+本质上最终都会将这些操作，生成一个Collector实例，然后调用他的方法生成最终的结果。
+
+#### collect里进行归约操作和使用Stream.reduce方法的异同
+
+是否是mutible的
+
+#### 分组
+
+#### 分区
+
+#### Collector接口
+
+```java
+public interface Collector<T, A, R> {
+Supplier<A> supplier();
+BiConsumer<A, T> accumulator();
+Function<A, R> finisher();
+BinaryOperator<A> combiner();
+Set<Characteristics> characteristics();
+}
+```
+
+- T是流中要收集的项目的泛型。
+- A是累加器的类型，累加器是在收集过程中用于累积部分结果的对象。
+- R是收集操作得到的对象（通常但并不一定是集合）的类型。
+
+##### 自定义Collector：根据需求自定义，提升性能
+
+### 流的并行处理与性能:内部使用ForkJoinPool框架
+
+在Java 7之前，并行处理数据集合非常麻烦。第一，你得明确地把包含数据的数据结构分成若干子部分。第二，你要给每个子部分分配一个独立的线程。第三，你需要在恰当的时候对它们进行同步来避免不希望出现的竞争条件，等待所有线程完成，最后把这些部分结果合并起来。Java 7引入了一个叫作分支/合并的框架，让这些操作更稳定、更不易出错。
+
+流是如何在幕后应用Java 7引入的分支/合并框架的。你还会发现，了解并行流内部是如何工作的很重要，因为如果你忽视这一方面，就可能因误用而得到意外的（很可能是错的）结果。
+
+#### 并发与并行在概念上的区别
+
+系统中有多个任务同时存在可称之为“并发”，系统内有多个任务同时（严格意义上的）执行可称之为“并行”；在单核CPU系统上，只可能存在并发而不可能存在并行。
+
+并**行**就是两个任务同时运行，就是甲任务进行的同时，乙任务也在进行。即同时执行多个任务，时间上的严格同时进行
+
+并**发**是指两个任务都请求运行，而处理器只能按受一个任务，就把这两个任务安排轮流进行，由于时间间隔较短，使人感觉两个任务都在运行。
+
+简单的说，并发和并行都是在充分利用CPU的性能。并发针对**单一CPU核心**而言，并行针对多核心CPU，多CPU或者多台主机而言。
+
+#### 并行流：stream.paraller(),注意只是设置标志位
+
+Stream接口可以让你非常方便地处理它的元素：可以通过对收集源调用parallelStream方法来把集合转换为并行流。并行流就是一个把内容分成多个数据块，并用不同的线程分别处理每个数据块的流。这样一来，你就可以自动把给定操作的工作负荷分配给多核处理器的所有内核。
+
+请注意，在现实中，对顺序流调用parallel方法并不意味着流本身有任何实际的变化。它在内部实际上就是设了一个boolean标志，表示你想让调用parallel之后进行的所有操作都并行执行。类似地，你只需要对并行流调用sequential方法就可以把它变成顺序流。
+
+请记住，并行化并不是没有代价的。并行化过程本身需要对流做递归划分，把每个子流的归纳操作分配到不同的线程，然后把这些操作的结果合并成一个值。但在多个内核之间移动数据的代价也可能比你想的要大，所以很重要的一点是要保证在内核中并行执行工作的时间比在内核之间传输数据的时间长。总而言之，很多情况下不可能或不方便并行化。然而，在使用并行Stream加速代码之前，你必须确保用得对；如果结果错了，算得快就毫无意义了。
+
+##### 高效使用并行流
+
+尽管如此，我们至少可以提出一些定性意见，帮你决定某个特定情况下是否有必要使用并行流：
+
+#### 分支/合并框架：内部使用ForkJoinPool
+
+分支/合并框架的目的是以递归方式将可以并行的任务拆分成更小的任务，然后将每个子任务的结果合并起来生成整体结果。它是ExecutorService接口的一个实现，它把子任务分配给线程池（称为ForkJoinPool）中的工作线程。
+
+##### 使用RecursiveTask
+
+要把任务提交到这个池，必须创建RecursiveTask\<R>的一个子类，其中R是并行化任务（以及所有子任务）产生的结果类型，或者如果任务不返回结果，则是RecursiveAction类型（当然它可能会更新其他非局部机构）。要定义RecursiveTask，只需实现它唯一的抽象方法compute：
+
+```java
+protected abstract R compute();
+//这个方法同时定义了将任务拆分成子任务的逻辑，以及无法再拆分或不方便再拆分时，生成单个子任务结果的逻辑。正由于此，这个方法的实现类似于下面的伪代码：
+if (任务足够小或不可分) {
+    顺序计算该任务
+} else {
+    将任务分成两个子任务
+    递归调用本方法，拆分每个子任务，等待所有子任务完成
+    合并每个子任务的结果
+}
+```
+
+##### 如何高效使用
+
+##### 工作窃取
+
+分支/合并框架工程用一种称为工作窃取（work stealing）的技术来解决这个问题。在实际应用中，这意味着这些任务差不多被平均分配到ForkJoinPool中的所有线程上。每个线程都为分配给它的任务保存一个双向链式队列，每完成一个任务，就会从队列头上取出下一个任务开始执行。基于前面所述的原因，某个线程可能早早完成了分配给它的所有任务，也就是它的队列已经空了，而其他的线程还很忙。这时，这个线程并没有闲下来，而是随机选了一个别的线程，从队列的尾巴上“偷走”一个任务。这个过程一直继续下去，直到所有的任务都执行完毕，所有的队列都清空。这就是为什么要划成许多小任务而不是少数几个大任务，这有助于更好地在工作线程之间平衡负载。
+
+#### Spliterator：定义了并行流如何拆分它要遍历的数据
+
+##### 拆分过程
+
+将Stream拆分成多个部分的算法是一个递归过程。第一步是对第一个Spliterator调用trySplit，生成第二个Spliterator。第二步对这两个Spliterator调用trysplit，这样总共就有了四个Spliterator。这个框架不断对Spliterator调用trySplit直到它返回null，表明它处理的数据结构不能再分割，如第三步所示。最后，这个递归拆分过程到第四步就终止了，这时所有的Spliterator在调用trySplit时都返回了null。
+
+##### Spliterator的特性
+
+### 高效使用java8编程
+
+#### 重构、测试、调试
+
+##### 为改善可读性和灵活性重构代码
+
+注意：匿名类和Lambda表达式中的this和super的含义是不同的。在匿名类中，this代表的是类自身，但是在Lambda中它代表的是包含类。
+
+1. 用Lambda表达式取代匿名类
+2. 用方法引用重构Lambda表达式
+3. 用Stream API重构命令式的数据处理
+4. 增加灵活性
+    1. 采用函数接口
+    2. 有条件的延迟执行
+    3. 环绕执行
+
+##### 使用Lambda 重构面向对象的设计模式的模板
+
+##### 测试lambada
+
+1. 测试可见lambada
+2. 测试使用lambada的方法
+
+##### 调试
+
+1. 查看堆栈信息
+2. 使用peek方法
+
+peek的设计初衷就是在流的每个元素恢复运行之前，插入执行一个动作。但是它不像forEach那样恢复整个流的运行，而是在一个元素上完成操作之后，它只会将操作顺承到流水线中的下一个操作
+
+#### 默认方法（非抽象方法：类似抽象类中的实例方法，所有子类都会继承该方法）
+
+默认方法的主要目标用户是类库的设计者啊。
+
+如果你是个类库的设计者，这一章的内容对你而言会十分重要，因为默认方法为接口的演进提供了一种平滑的方式，你的改动将不会导致已有代码的修改。此外，正如我们后文会介绍的，默认方法为方法的多继承提供了一种更灵活的机制，可以帮助你更好地规划你的代码结构：类可以从多个接口继承默认方法。因此，即使你并非类库的设计者，也能在其中发现感兴趣的东西。
+
+##### 不断演进的api
+
+兼容性：
+
+- 二进制兼容
+- 源码级别的兼容
+- 方法（函数行为）级别的兼容
+
+##### 默认方法的使用模式
+
+1. 可选方法
+2. 行为的多继承
+    1. 类的多继承
+        ArrayList继承了一个类，实现了六个接口。因此ArrayList实际是七个类型的直接子类，分别是：AbstractList、List、RandomAccess、Cloneable、Serializable、Iterable和Collection。所以，在某种程度上，我们早就有了类型的多继承。
+    2. 利用正交方法的精简接口
+
+##### 解决默认方法冲突（方法签名冲突）
+
+- 类中的方法优先级最高。类或父类中声明的方法的优先级高于任何声明为默认方法的优先级。
+- 如果无法依据第一条进行判断，那么子接口的优先级更高：函数签名相同时，优先选择拥有最具体实现的默认方法的接口，即如果B继承了A，那么B就比A更加具体。
+- 最后，如果还是无法判断，继承了多个接口的类必须通过显式覆盖和调用期望的方法，显式地选择使用哪一个父类默认方法的实现。
+
+1. 冲突及如何显式地消除歧义
+
+```java
+public interface A {
+    default void do() {}
+}
+public interface B {
+    default void do() {}
+}
+
+public class c implements A,B {
+    public void do() {  // 必须覆盖方法，否则编译失败
+        B.supper.do();  // 指定调用哪一个父类的方法
+    }
+}
+```
+
+#### 用Optional取代null
+
+ps:由于Optional无法序列化，不要用于domain对象。Optional的设计初衷仅仅是要支持返回Optional对象的方法
+
+Optioanl也可以视作包含就一元素的容器，所以类型stream的使用方式 也可以用在Optional上。
+
+#### CompletableFuture：组合式异步编程
+
+##### Future接口
+
+Future接口在Java 5中被引入，设计初衷是对将来某个时刻会发生的结果进行建模。它建模了一种异步计算，返回一个执行运算结果的引用，当运算结束后，这个引用被返回给调用方。在Future中触发那些潜在耗时的操作把调用线程解放出来，让它能继续执行其他有价值的工作，不再需要呆呆等待耗时的操作完成。
+
+即异步执行某些耗时任务，解放当前线程。当前线程发起异步任务后，可以做其他事情，如果需要该耗时任务的结果时，再调用Future对象的get方法，如果不能获取到结果，表示该任务还未完成，需要阻塞等待。
+
+##### 使用CompletableFuture 构建异步应用
+
+1. 错误处理
+    如果异步任务遇到异常中断，即该线程已经结束运行，那么当我们尝试获取该任务的结果时，会一直阻塞下去，或者我们使用超时返回异常的的方式调用，不过这样客户端（指本次调用的主任务线程）就无法知道任务线程的异常详情。为了让客户端了解异常详情，需要使用CompletableFuture的completeExceptionally方法将导致CompletableFuture内发生问题的异常抛出。
+
+2. 使用工厂方法supplyAsync创建CompletableFuture：配合lambad使用
+
+##### 使用自定义Executor执行completeableFuture
+
+如何优化：将内部通用线程池(即默认使用ForkJoinPool创建的线程池，数量为cpu核数)
+
+1. 调整线程池的大小:线程池大小计算公式
+2. 并行——使用流还是CompletableFutures？
+    - 如果你进行的是计算密集型的操作，并且没有I/O，那么推荐使用Stream接口，因为实现简单，同时效率也可能是最高的（如果所有的线程都是计算密集型的，那就没有必要创建比处理器核数更多的线程）。（因为每个CPU必定满负载，如果线程多了，CPU还会增加额外切换线程的开销）
+    - 反之，如果你并行的工作单元还涉及等待I/O的操作（包括网络连接等待），那么使用CompletableFuture灵活性更好，你可以像前文讨论的那样，依据等待/计算，或者W/C的比率设定需要使用的线程数。这种情况不使用并行流的另一个原因是，处理流的流水线中如果发生I/O等待，流的延迟特性会让我们很难判断到底什么时候触发了等待。
+
+##### 将多个同步或者异步合成pipeline(流水线)
+
+1. 任务执行完之后执行：thenApply
+2. 连接相关任务(即第二个任务执行依赖前一个任务的执行结果):thenCompose
+3. 连接不相关任务(后执行的任务不依赖当前任务的执行结果，两个并行执行，最后合并):thenCombine
+
+##### 响应CompletableFuture 的completion 事件:thenAccept
